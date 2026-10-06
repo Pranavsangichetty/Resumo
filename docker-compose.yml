@@ -1,0 +1,11 @@
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: resumo
+      POSTGRES_USER: resumo
+      POSTGRES_PASSWORD: resumo_dev
+    ports: ["5433:5432"]
+    volumes: [resumo_data:/var/lib/postgresql/data]
+volumes:
+  resumo_data:

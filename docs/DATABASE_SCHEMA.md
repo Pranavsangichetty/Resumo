@@ -1,0 +1,13 @@
+# Planned tables
+users
+settings
+master_profiles
+resumes
+resume_versions
+job_descriptions
+ats_reports
+cover_letters
+applications
+interview_history
+chat_conversations
+chat_messages

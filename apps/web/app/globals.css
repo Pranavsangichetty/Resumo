@@ -1,0 +1,157 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ======================================================
+   RESUMO THEME SYSTEM — LIGHT & DARK
+   ====================================================== */
+
+/* ---------- LIGHT MODE (default) ---------- */
+:root {
+  --bg-base:             #f8f9fc;
+  --bg-surface:          #ffffff;
+  --bg-surface-elevated: #f1f3f8;
+  --bg-muted:            #eef1f6;
+  --border:              #d8dee9;
+  --border-hover:        #b0bbd0;
+  --border-focus:        #6366f1;
+  --text-primary:        #1e293b;
+  --text-secondary:      #475569;
+  --text-muted:          #94a3b8;
+  --accent:              #6366f1;
+  --accent-hover:        #4f46e5;
+  --accent-light:        #818cf8;
+  --accent-glow:         rgba(99, 102, 241, 0.15);
+  --accent-fg:           #ffffff;
+  --card-bg-start:       rgba(255, 255, 255, 0.9);
+  --card-bg-end:         rgba(241, 243, 248, 0.95);
+  --shadow-card:         rgba(99, 102, 241, 0.06);
+  --shadow-card-hover:   rgba(99, 102, 241, 0.12);
+  --scrollbar-track:     #f1f3f8;
+  --scrollbar-thumb:     #cbd5e1;
+  --scrollbar-thumb-hover: #94a3b8;
+}
+
+/* ---------- DARK MODE (Deep Obsidian & Electric Indigo) ---------- */
+.dark {
+  --bg-base:             #090a0f;
+  --bg-surface:          #11131c;
+  --bg-surface-elevated: #161926;
+  --bg-muted:            #0c0e15;
+  --border:              #1f2438;
+  --border-hover:        #313a5b;
+  --border-focus:        #6366f1;
+  --text-primary:        #f8fafc;
+  --text-secondary:      #94a3b8;
+  --text-muted:          #64748b;
+  --accent:              #6366f1;
+  --accent-hover:        #4f46e5;
+  --accent-light:        #818cf8;
+  --accent-glow:         rgba(99, 102, 241, 0.25);
+  --accent-fg:           #ffffff;
+  --card-bg-start:       rgba(22, 25, 38, 0.8);
+  --card-bg-end:         rgba(17, 19, 28, 0.95);
+  --shadow-card:         rgba(0, 0, 0, 0.5);
+  --shadow-card-hover:   rgba(99, 102, 241, 0.15);
+  --scrollbar-track:     #090a0f;
+  --scrollbar-thumb:     #1f2438;
+  --scrollbar-thumb-hover: #313a5b;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background-color: var(--bg-base);
+  color: var(--text-primary);
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  -webkit-font-smoothing: antialiased;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Custom modern scrollbars — theme-aware */
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+}
+
+/* Glassmorphic / glowing card — theme-aware */
+.card-glow {
+  position: relative;
+  background: linear-gradient(180deg, var(--card-bg-start) 0%, var(--card-bg-end) 100%);
+  border: 1px solid var(--border);
+  box-shadow: 0 4px 20px -2px var(--shadow-card);
+  transition: all 0.25s ease-in-out;
+}
+
+.card-glow:hover {
+  border-color: rgba(99, 102, 241, 0.4);
+  box-shadow: 0 8px 30px -4px var(--shadow-card-hover);
+  transform: translateY(-1px);
+}
+
+.btn-indigo-glow {
+  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+  color: #ffffff;
+  box-shadow: 0 0 20px -3px rgba(99, 102, 241, 0.4);
+  transition: all 0.2s ease;
+}
+
+.btn-indigo-glow:hover {
+  background: linear-gradient(135deg, #818cf8 0%, #6366f1 100%);
+  box-shadow: 0 0 25px 0px rgba(99, 102, 241, 0.6);
+  transform: translateY(-1px);
+}
+
+/* ======================================================
+   RESUME PRINT / PDF
+   ====================================================== */
+
+@media print {
+  @page {
+    size: A4;
+    margin: 0;
+  }
+
+  html,
+  body {
+    margin: 0;
+    padding: 0;
+    background: white !important;
+    color: black !important;
+  }
+
+  body * {
+    visibility: hidden !important;
+  }
+
+  .print-resume,
+  .print-resume * {
+    visibility: visible !important;
+  }
+
+  .print-resume {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 210mm;
+    min-height: 297mm;
+    margin: 0;
+    padding: 12mm !important;
+    background: white !important;
+    color: black !important;
+    box-shadow: none !important;
+    border: none !important;
+  }
+}
