@@ -157,3 +157,8 @@ Visit [http://localhost:3000](http://localhost:3000) in your browser.
 ## 🤝 Contributing
 
 Contributions, feature requests, and bug reports are welcome! Feel free to check the [issues page](https://github.com/Pranavsangichetty/Resumo/issues).
+
+## Contributors
+
+- [G.V.M. Durga Sandeep](https://github.com/Sandeep3002)
+- [Pranav Sangichetty](https://github.com/Pranavsangichetty)
