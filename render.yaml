@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: resumo-api
+    runtime: python
+    rootDir: apps/api
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: CORS_ORIGINS
+        value: http://localhost:3000,http://127.0.0.1:3000
+      - key: JWT_SECRET
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          name: resumo-db
+          property: connectionString
+
+databases:
+  - name: resumo-db
+    databaseName: resumo
+    user: resumo
+    plan: free

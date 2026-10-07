@@ -28,6 +28,7 @@ def init_db() -> None:
     # Ensure all models are registered with Base metadata
     from app.models.user import User  # noqa: F401
     from app.models.resume import Resume  # noqa: F401
+    from app.models.application import Application  # noqa: F401
     try:
         from app.models.user_settings import UserSettings  # noqa: F401
     except ImportError:

@@ -57,7 +57,7 @@ export default function LoginPage() {
       console.warn("Login request failed:", err);
 
       setError(
-        "Unable to connect to the backend server. Please verify the API server is running on http://localhost:8000."
+        `Unable to connect to the backend server. Please verify the API server is running on ${API_URL}.`
       );
     } finally {
       setLoading(false);

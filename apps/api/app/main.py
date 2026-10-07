@@ -12,6 +12,7 @@ from app.api.routes.mock_interview import router as mock_interview_router
 from app.api.routes.resumes import router as resumes_router
 from app.api.routes.settings import router as settings_router
 from app.ats import router as ats_router
+from app.core.config import settings
 from app.db.session import init_db
 from app.optimization import router as optimization_router
 
@@ -34,17 +35,26 @@ app = FastAPI(
 # CORS Configuration
 # --------------------------------------------------
 
+cors_origins_list = [
+    origin.strip()
+    for origin in settings.CORS_ORIGINS.split(",")
+    if origin.strip()
+]
+for default_origin in [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "http://localhost:3001",
+    "http://127.0.0.1:3001",
+    "http://localhost:8000",
+    "http://127.0.0.1:8000",
+]:
+    if default_origin not in cors_origins_list:
+        cors_origins_list.append(default_origin)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
-        "http://localhost:3001",
-        "http://127.0.0.1:3001",
-        "http://localhost:8000",
-        "http://127.0.0.1:8000",
-    ],
-    allow_origin_regex=r"^https?://(localhost|127\.0\.0\.1)(:\d+)?$",
+    allow_origins=cors_origins_list,
+    allow_origin_regex=r"^https?://(localhost|127\.0\.0\.1)(:\d+)?$|^https://([a-zA-Z0-9-]+\.)*vercel\.app$|^https://([a-zA-Z0-9-]+\.)*netlify\.app$",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -147,3 +157,11 @@ def chat(payload: ChatRequest):
             "will be connected during the AI integration sprint."
         )
     }
+
+
+if __name__ == "__main__":
+    import os
+    import uvicorn
+
+    port = int(os.getenv("PORT", 8000))
+    uvicorn.run("app.main:app", host="0.0.0.0", port=port, reload=False)
