@@ -146,6 +146,7 @@ export default function ATSPage() {
             "Content-Type":
               "application/json",
 
+            "bypass-tunnel-reminder": "true",
             Authorization:
               `Bearer ${token}`,
           },

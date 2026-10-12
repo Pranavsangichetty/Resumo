@@ -6,6 +6,13 @@ const API_URL =
   process.env.NEXT_PUBLIC_API_URL?.replace(/\/+$/, "") ||
   "http://localhost:8000";
 
+function defaultHeaders(extra: Record<string, string> = {}): Record<string, string> {
+  return {
+    "bypass-tunnel-reminder": "true",
+    ...extra,
+  };
+}
+
 // ======================================================
 // AUTH TYPES
 // ======================================================
@@ -146,9 +153,9 @@ export async function registerUser(
       `${API_URL}/api/v1/auth/register`,
       {
         method: "POST",
-        headers: {
+        headers: defaultHeaders({
           "Content-Type": "application/json",
-        },
+        }),
         body: JSON.stringify(data),
       }
     );
@@ -172,9 +179,9 @@ export async function loginUser(
       `${API_URL}/api/v1/auth/login`,
       {
         method: "POST",
-        headers: {
+        headers: defaultHeaders({
           "Content-Type": "application/json",
-        },
+        }),
         body: JSON.stringify(data),
       }
     );
@@ -198,9 +205,9 @@ export async function getCurrentUser(
       `${API_URL}/api/v1/auth/me`,
       {
         method: "GET",
-        headers: {
+        headers: defaultHeaders({
           Authorization: `Bearer ${token}`,
-        },
+        }),
       }
     );
 
@@ -227,9 +234,9 @@ export async function getResumes(
       `${API_URL}/api/v1/resumes`,
       {
         method: "GET",
-        headers: {
+        headers: defaultHeaders({
           Authorization: `Bearer ${token}`,
-        },
+        }),
         cache: "no-store",
       }
     );
@@ -270,10 +277,10 @@ export async function getResume(
       url,
       {
         method: "GET",
-        headers: {
+        headers: defaultHeaders({
           Accept: "application/json",
           Authorization: `Bearer ${token}`,
-        },
+        }),
         cache: "no-store",
       }
     );
@@ -313,10 +320,10 @@ export async function createResume(
       `${API_URL}/api/v1/resumes`,
       {
         method: "POST",
-        headers: {
+        headers: defaultHeaders({
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
-        },
+        }),
         body: JSON.stringify(data),
       }
     );
@@ -359,10 +366,10 @@ export async function uploadExistingResume(
       `${API_URL}/api/v1/resumes/upload`,
       {
         method: "POST",
-        headers: {
+        headers: defaultHeaders({
           Authorization: `Bearer ${token}`,
           Accept: "application/json",
-        },
+        }),
         body: formData,
       }
     );
@@ -409,10 +416,10 @@ export async function updateResume(
       `${API_URL}/api/v1/resumes/${resumeId}`,
       {
         method: "PATCH",
-        headers: {
+        headers: defaultHeaders({
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
-        },
+        }),
         body: JSON.stringify(data),
       }
     );
@@ -449,9 +456,9 @@ export async function deleteResume(
       `${API_URL}/api/v1/resumes/${resumeId}`,
       {
         method: "DELETE",
-        headers: {
+        headers: defaultHeaders({
           Authorization: `Bearer ${token}`,
-        },
+        }),
       }
     );
 

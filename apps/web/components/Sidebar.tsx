@@ -35,7 +35,10 @@ export default function Sidebar() {
     if (!token) return;
 
     fetch(`${API_URL}/api/v1/auth/me`, {
-      headers: { Authorization: `Bearer ${token}` },
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "bypass-tunnel-reminder": "true",
+      },
     })
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => data && setUser(data))

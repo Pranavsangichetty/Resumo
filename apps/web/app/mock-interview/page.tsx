@@ -42,6 +42,7 @@ export default function MockInterviewPage() {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
+          "bypass-tunnel-reminder": "true",
         },
         body: JSON.stringify({
           job_title: jobTitle,

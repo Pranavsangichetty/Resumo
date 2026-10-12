@@ -129,6 +129,7 @@ export default function Dashboard() {
           method: "GET",
           headers: {
             Authorization: `Bearer ${token}`,
+            "bypass-tunnel-reminder": "true",
           },
         });
 

@@ -31,7 +31,10 @@ export default function ForgotPasswordPage() {
         `${API_URL}/api/v1/auth/forgot-password`,
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            "bypass-tunnel-reminder": "true",
+          },
           body: JSON.stringify({ email: email.trim().toLowerCase() }),
         }
       );

@@ -59,7 +59,10 @@ export default function SettingsPage() {
       try {
         // Load User Me
         const resUser = await fetch(`${API_URL}/api/v1/auth/me`, {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "bypass-tunnel-reminder": "true",
+          },
         });
         if (resUser.ok) {
           const userData = await resUser.json();
@@ -73,7 +76,10 @@ export default function SettingsPage() {
 
         // Load Settings (but DON'T override the local theme — localStorage is the source of truth)
         const resSettings = await fetch(`${API_URL}/api/v1/settings`, {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "bypass-tunnel-reminder": "true",
+          },
         });
         if (resSettings.ok) {
           const settingsData = await resSettings.json();
@@ -110,6 +116,7 @@ export default function SettingsPage() {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
+          "bypass-tunnel-reminder": "true",
         },
         body: JSON.stringify(settings),
       });
@@ -150,6 +157,7 @@ export default function SettingsPage() {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
+          "bypass-tunnel-reminder": "true",
         },
         body: JSON.stringify(body),
       });

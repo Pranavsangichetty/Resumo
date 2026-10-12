@@ -28,7 +28,10 @@ export function Chatbot() {
         `${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000"}/api/v1/chat`,
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            "bypass-tunnel-reminder": "true",
+          },
           body: JSON.stringify({ message: value }),
         }
       );

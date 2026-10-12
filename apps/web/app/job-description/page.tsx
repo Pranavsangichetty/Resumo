@@ -46,7 +46,10 @@ export default function JobDescriptionPage() {
 
       try {
         const res = await fetch(`${API_URL}/api/v1/resumes`, {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "bypass-tunnel-reminder": "true",
+          },
         });
         if (res.ok) {
           const list = await res.json();
@@ -85,6 +88,7 @@ export default function JobDescriptionPage() {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
+          "bypass-tunnel-reminder": "true",
         },
         body: JSON.stringify({
           job_title: jobTitle || undefined,

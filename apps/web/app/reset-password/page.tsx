@@ -38,7 +38,10 @@ function ResetPasswordForm() {
         `${API_URL}/api/v1/auth/reset-password`,
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            "bypass-tunnel-reminder": "true",
+          },
           body: JSON.stringify({ token, new_password: password }),
         }
       );

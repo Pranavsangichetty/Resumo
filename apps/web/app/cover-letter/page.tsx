@@ -56,7 +56,10 @@ export default function CoverLetterPage() {
 
       try {
         const res = await fetch(`${API_URL}/api/v1/resumes`, {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "bypass-tunnel-reminder": "true",
+          },
         });
         if (res.ok) {
           const list: ResumeSummary[] = await res.json();
@@ -104,6 +107,7 @@ export default function CoverLetterPage() {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
+          "bypass-tunnel-reminder": "true",
         },
         body: JSON.stringify({
           company_name: company.trim(),

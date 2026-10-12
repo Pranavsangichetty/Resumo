@@ -52,7 +52,10 @@ export default function ApplicationsPage() {
 
     try {
       const res = await fetch(`${API_URL}/api/v1/applications`, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "bypass-tunnel-reminder": "true",
+        },
       });
       if (res.ok) {
         const list = await res.json();
@@ -77,6 +80,7 @@ export default function ApplicationsPage() {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
+          "bypass-tunnel-reminder": "true",
         },
         body: JSON.stringify({
           company,
@@ -117,6 +121,7 @@ export default function ApplicationsPage() {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
+          "bypass-tunnel-reminder": "true",
         },
         body: JSON.stringify({ status: newStatus }),
       });
@@ -138,7 +143,10 @@ export default function ApplicationsPage() {
     try {
       const res = await fetch(`${API_URL}/api/v1/applications/${id}`, {
         method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "bypass-tunnel-reminder": "true",
+        },
       });
       if (res.ok || res.status === 204) {
         setApplications(applications.filter((a) => a.id !== id));
