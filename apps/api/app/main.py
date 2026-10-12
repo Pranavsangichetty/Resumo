@@ -129,9 +129,10 @@ class ChatRequest(BaseModel):
 
 
 # --------------------------------------------------
-# Health Check
+# Health Check & Root
 # --------------------------------------------------
 
+@app.get("/")
 @app.get("/health")
 def health():
     return {

@@ -506,7 +506,20 @@ export default function JobSearchPage() {
                         : null}
                     </div>
 
-                    <div className="flex gap-2 shrink-0">
+                    <div className="flex gap-2 shrink-0 items-center">
+                      {/* Apply */}
+                      <a
+                        href={
+                          job.applyUrl && job.applyUrl !== "#"
+                            ? job.applyUrl
+                            : `https://www.google.com/search?q=${encodeURIComponent(`${job.company} ${job.title} careers apply`)}`
+                        }
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="rounded-xl bg-emerald-600 px-3.5 py-1.5 text-xs font-semibold text-white hover:bg-emerald-500 transition shadow-sm inline-flex items-center gap-1"
+                      >
+                        Apply ↗
+                      </a>
                       {/* ATS Score */}
                       <button
                         onClick={() =>

@@ -137,17 +137,36 @@ Return JSON using EXACTLY this structure:
 """
 
     # ==================================================
-    # CALL GEMINI
+    # CALL GEMINI WITH MODEL FALLBACK CASCADE
     # ==================================================
 
-    response = client.models.generate_content(
-        model="gemini-3.6-flash",
-        contents=prompt,
-    )
+    models_to_try = [
+        "gemini-3.8-flash",
+        "gemini-2.5-flash",
+        "gemini-3.6-flash",
+        "gemini-1.5-flash",
+    ]
 
-    if not response.text:
+    response = None
+    last_error = None
+
+    for candidate_model in models_to_try:
+        try:
+            candidate_res = client.models.generate_content(
+                model=candidate_model,
+                contents=prompt,
+            )
+            if candidate_res and candidate_res.text:
+                response = candidate_res
+                break
+        except Exception as exc:
+            last_error = exc
+            print(f"[Gemini Optimizer] Model {candidate_model} failed: {exc}")
+            continue
+
+    if not response or not response.text:
         raise RuntimeError(
-            "Gemini returned an empty response."
+            f"Gemini returned an empty response or service unavailable: {last_error}"
         )
 
     text = response.text.strip()
