@@ -200,7 +200,7 @@ def _generate_with_gemini(prompt: str) -> Optional[str]:
     try:
         from google import genai as google_genai
         client = google_genai.Client(api_key=api_key)
-        for model_name in ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash"]:
+        for model_name in ["gemini-3.5-flash", "gemini-3.5-flash-lite", "gemini-3.8-flash", "gemini-3.7-flash"]:
             try:
                 response = client.models.generate_content(
                     model=model_name,
