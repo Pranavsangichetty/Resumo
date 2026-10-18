@@ -50,3 +50,4 @@ PyMuPDF
 pytesseract
 Pillow
 google-genai
+gradio
