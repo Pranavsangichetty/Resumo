@@ -2,6 +2,20 @@
 
 > **Craft Better. Apply Smarter.**
 
+[![Live Web Application](https://img.shields.io/badge/Live%20App-resumo--zeta.vercel.app-brightgreen?style=for-the-badge&logo=vercel)](https://resumo-zeta.vercel.app/)
+[![API Backend Status](https://img.shields.io/badge/Backend%20API-Hugging%20Face%20ZeroGPU-orange?style=for-the-badge&logo=huggingface)](https://nani111-resumo-api.hf.space)
+
+---
+
+## 🌐 Live Deployment
+
+Experience Resumo live in your browser:
+- **Web Application**: [https://resumo-zeta.vercel.app/](https://resumo-zeta.vercel.app/)
+- **Backend API (24/7 ZeroGPU)**: [https://nani111-resumo-api.hf.space](https://nani111-resumo-api.hf.space)
+- **API Documentation (Swagger UI)**: [https://nani111-resumo-api.hf.space/docs](https://nani111-resumo-api.hf.space/docs)
+
+---
+
 Resumo is a modern, end-to-end career assistance platform designed to empower job seekers. From AI-driven resume creation and ATS scoring to job description analysis, cover letter generation, mock interviews, and job application tracking, Resumo streamlines every step of your hiring journey.
 
 ---
