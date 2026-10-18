@@ -6,26 +6,25 @@ import spaces
 from app.main import app as fastapi_app
 
 @spaces.GPU
-def gpu_health(text: str = "status") -> str:
+def gpu_health(text: str) -> str:
     return f"ZeroGPU Online: {text}"
 
-# Official ZeroGPU pattern: gr.Interface directly bound to @spaces.GPU function
-demo = gr.Interface(
-    fn=gpu_health,
-    inputs=gr.Textbox(label="Status Query", value="ping"),
-    outputs=gr.Textbox(label="Status"),
-    title="Resumo API Server",
-    description=(
-        "Backend FastAPI service powering the "
+with gr.Blocks(title="Resumo API Server") as demo:
+    gr.Markdown("# 🚀 Resumo Backend API is Live!")
+    gr.Markdown(
+        "This Hugging Face Space hosts the FastAPI backend for the "
         "[Resumo Web App](https://resumo01.netlify.app).\n\n"
-        "- Status: Operational ✅\n"
-        "- Health: /health\n"
-        "- API Docs: /docs"
-    ),
-)
+        "- **Status**: Operational ✅\n"
+        "- **Health Check**: `/health`\n"
+        "- **API Docs**: `/docs`"
+    )
+    with gr.Row():
+        txt_in = gr.Textbox(label="Status Query", value="ping")
+        txt_out = gr.Textbox(label="Hardware Status")
+    btn = gr.Button("Check Hardware")
+    btn.click(fn=gpu_health, inputs=txt_in, outputs=txt_out)
 
-# Disable SSR mode to prevent Node.js from binding port 7860
-app = gr.mount_gradio_app(fastapi_app, demo, path="/gradio", ssr_mode=False)
+app = gr.mount_gradio_app(fastapi_app, demo, path="/", ssr_mode=False)
 
 if __name__ == "__main__":
     import uvicorn
