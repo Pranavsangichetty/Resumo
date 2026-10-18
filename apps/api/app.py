@@ -38,14 +38,9 @@ if __name__ == "__main__":
         prevent_thread_lock=True,
     )
 
-    # Attach health check directly to running app
-    @app.get("/health")
-    def health():
-        return {"status": "ok", "product": "Resumo"}
+    # Attach all FastAPI routes (including /health and /api/v1/...) directly
+    app.include_router(fastapi_app.router)
 
-    # Mount our FastAPI routes onto the running server
-    app.mount("/api/v1", fastapi_app)
-    app.mount("/api", fastapi_app)
 
 
     print(f"Resumo API Server running at {local_url} with FastAPI mounted.")
