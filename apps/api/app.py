@@ -38,23 +38,15 @@ if __name__ == "__main__":
         prevent_thread_lock=True,
     )
 
-    # Configure CORS on the running server
-    app.add_middleware(
-        CORSMiddleware,
-        allow_origins=["*"],
-        allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
-    )
-
-    # Attach health check
+    # Attach health check directly to running app
     @app.get("/health")
     def health():
         return {"status": "ok", "product": "Resumo"}
 
     # Mount our FastAPI routes onto the running server
     app.mount("/api/v1", fastapi_app)
-    app.mount("", fastapi_app)
+    app.mount("/api", fastapi_app)
+
 
     print(f"Resumo API Server running at {local_url} with FastAPI mounted.")
     demo.block_thread()
