@@ -56,8 +56,86 @@ def get_smtp_from() -> str:
     return os.environ.get("SMTP_FROM") or settings.SMTP_FROM
 
 
+def get_brevo_api_key() -> str:
+    key = os.environ.get("BREVO_API_KEY") or getattr(settings, "BREVO_API_KEY", "") or ""
+    key = key.strip("'\" \r\n\t")
+    if key.startswith("xkeysib-"):
+        return key
+
+    smtp_pwd = os.environ.get("SMTP_PASSWORD") or settings.SMTP_PASSWORD or ""
+    smtp_pwd = smtp_pwd.strip("'\" \r\n\t")
+    if smtp_pwd.startswith("xkeysib-"):
+        return smtp_pwd
+
+    for _, v in os.environ.items():
+        if isinstance(v, str):
+            clean = v.strip("'\" \r\n\t")
+            if clean.startswith("xkeysib-"):
+                return clean
+    return ""
+
+
+def get_brevo_sender() -> str:
+    sender = (
+        os.environ.get("BREVO_SENDER_EMAIL")
+        or os.environ.get("SMTP_FROM")
+        or os.environ.get("SMTP_USERNAME")
+        or ""
+    ).strip("'\" \r\n\t")
+    if "@" in sender and "resend" not in sender and "brevo" not in sender:
+        return sender
+    return "contact.gvmsc@gmail.com"
+
+
+def send_via_brevo(to_email: str, subject: str, html_content: str, text_content: str) -> tuple[bool, str]:
+    """Send email to ANY recipient using Brevo REST API."""
+    key = get_brevo_api_key()
+    sender_email = get_brevo_sender()
+    try:
+        url = "https://api.brevo.com/v3/smtp/email"
+        headers = {
+            "api-key": key,
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+            "User-Agent": "Resumo/1.0",
+        }
+        payload = {
+            "sender": {
+                "name": "Resumo",
+                "email": sender_email,
+            },
+            "to": [
+                {
+                    "email": to_email,
+                }
+            ],
+            "subject": subject,
+            "htmlContent": html_content,
+            "textContent": text_content,
+        }
+        data = json.dumps(payload).encode("utf-8")
+        req = urllib.request.Request(url, data=data, headers=headers, method="POST")
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            if resp.status in (200, 201):
+                logger.info(f"[Brevo] Email sent successfully to {to_email}")
+                print(f"[SUCCESS] [Brevo] Password reset email sent to {to_email}")
+                return True, "Email sent via Brevo"
+    except urllib.error.HTTPError as he:
+        body = he.read().decode("utf-8")
+        logger.error(f"[Brevo HTTPError {he.code}] {body}")
+        print(f"[ERROR] [Brevo HTTP {he.code}]: {body}")
+        return False, f"Brevo HTTP {he.code}: {body}"
+    except Exception as e:
+        logger.error(f"[Brevo Error] Failed to send email to {to_email}: {e}")
+        print(f"[ERROR] [Brevo Error]: {e}")
+        return False, f"Brevo Error: {e}"
+    return False, "Failed to send via Brevo"
+
+
 def is_smtp_configured() -> bool:
-    """Check if Resend API key or SMTP credentials are valid."""
+    """Check if Brevo, Resend API key or SMTP credentials are valid."""
+    if get_brevo_api_key().startswith("xkeysib-"):
+        return True
     if get_resend_api_key().startswith("re_"):
         return True
     host = get_smtp_host()
@@ -158,6 +236,10 @@ def send_password_reset_email(to_email: str, reset_link: str) -> tuple[bool, str
         f"If you didn't request this, just ignore this email.\n\n"
         f"- Resumo"
     )
+
+    brevo_key = get_brevo_api_key()
+    if brevo_key.startswith("xkeysib-"):
+        return send_via_brevo(to_email, "Resumo - Reset Your Password", html, text)
 
     if resend_key.startswith("re_"):
         return send_via_resend(to_email, "Resumo - Reset Your Password", html, text)
