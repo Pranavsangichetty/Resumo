@@ -113,6 +113,25 @@ def verify_google_token(credential: str) -> dict | None:
     return None
 
 
+def verify_google_access_token(access_token: str) -> dict | None:
+    try:
+        url = "https://www.googleapis.com/oauth2/v3/userinfo"
+        req = urllib.request.Request(
+            url,
+            headers={
+                "Authorization": f"Bearer {access_token}",
+                "User-Agent": "Resumo/1.0",
+            },
+        )
+        with urllib.request.urlopen(req, timeout=10) as response:
+            if response.status == 200:
+                data = json.loads(response.read().decode("utf-8"))
+                return data
+    except Exception as e:
+        logger.error(f"Error validating Google access token: {e}")
+    return None
+
+
 @router.post(
     "/google",
     response_model=Token,
@@ -122,7 +141,12 @@ def google_auth(
     payload: GoogleAuthRequest,
     db: Session = Depends(get_db),
 ):
-    google_data = verify_google_token(payload.credential)
+    google_data = None
+    if payload.credential:
+        google_data = verify_google_token(payload.credential)
+    elif payload.access_token:
+        google_data = verify_google_access_token(payload.access_token)
+
     if not google_data or not google_data.get("email"):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
