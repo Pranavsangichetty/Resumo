@@ -31,7 +31,11 @@ def send_via_resend(to_email: str, subject: str, html_content: str, text_content
             "Content-Type": "application/json",
             "User-Agent": "Resumo/1.0",
         }
-        sender = settings.SMTP_FROM or "Resumo <onboarding@resend.dev>"
+        # Free Resend accounts can only send from onboarding@resend.dev
+        sender = "Resumo <onboarding@resend.dev>"
+        if settings.SMTP_FROM and "resend.dev" in settings.SMTP_FROM:
+            sender = settings.SMTP_FROM
+
         payload = {
             "from": sender,
             "to": [to_email],
@@ -46,6 +50,10 @@ def send_via_resend(to_email: str, subject: str, html_content: str, text_content
                 logger.info(f"[Resend] Email sent successfully to {to_email}")
                 print(f"[SUCCESS] [Resend] Password reset email sent to {to_email}")
                 return True
+    except urllib.error.HTTPError as he:
+        body = he.read().decode("utf-8")
+        logger.error(f"[Resend HTTPError {he.code}] {body}")
+        print(f"[ERROR] [Resend HTTP {he.code}]: {body}")
     except Exception as e:
         logger.error(f"[Resend Error] Failed to send email to {to_email}: {e}")
         print(f"[ERROR] [Resend Error]: {e}")
