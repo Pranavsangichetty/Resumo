@@ -101,8 +101,11 @@ def verify_google_token(credential: str) -> dict | None:
                 data = json.loads(response.read().decode("utf-8"))
                 iss = data.get("iss", "")
                 if "accounts.google.com" in iss or iss == "https://accounts.google.com":
-                    if settings.GOOGLE_CLIENT_ID and data.get("aud") != settings.GOOGLE_CLIENT_ID:
-                        logger.warning("Google token aud mismatch")
+                    configured_client_id = (settings.GOOGLE_CLIENT_ID or "").strip().strip("\"'")
+                    if configured_client_id and data.get("aud") != configured_client_id:
+                        logger.warning(
+                            f"Google token aud mismatch: token aud={data.get('aud')} vs configured={configured_client_id}"
+                        )
                         return None
                     return data
     except Exception as e:
@@ -140,10 +143,7 @@ def google_auth(
     )
 
     access_token = create_access_token(
-        data={
-            "sub": user.email,
-            "id": user.id,
-        }
+        subject=str(user.id),
     )
     return Token(
         access_token=access_token,

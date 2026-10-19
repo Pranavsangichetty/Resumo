@@ -73,25 +73,42 @@ export default function GoogleSignInButton({
 
     setLoading(true);
     try {
-      const res = await fetch(`${API_URL}/api/v1/auth/google`, {
+      // 1. Try same-origin Next.js proxy route first (zero CORS, server-to-server)
+      let res: Response | null = await fetch("/api/auth/google", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "bypass-tunnel-reminder": "true",
         },
         body: JSON.stringify({ credential: response.credential }),
-      });
+      }).catch(() => null);
 
-      const data = await res.json();
+      // 2. If proxy route is not found (e.g. running on local standalone server), fallback to direct API
+      if (!res || res.status === 404) {
+        res = await fetch(`${API_URL}/api/v1/auth/google`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ credential: response.credential }),
+        });
+      }
+
+      const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        onError?.(data.detail || "Google authentication failed.");
+        onError?.(data.detail || data.message || "Google authentication failed.");
+        return;
+      }
+
+      if (!data.access_token) {
+        onError?.("No access token returned by authentication server.");
         return;
       }
 
       localStorage.setItem("access_token", data.access_token);
       router.push("/dashboard");
-    } catch {
-      onError?.("Failed to communicate with authentication server.");
+    } catch (err: any) {
+      console.error("[GoogleAuth] Error during credential exchange:", err);
+      onError?.(err?.message || "Failed to communicate with authentication server.");
     } finally {
       setLoading(false);
     }
