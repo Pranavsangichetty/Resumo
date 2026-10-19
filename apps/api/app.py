@@ -10,6 +10,31 @@ from app.db.session import init_db
 # Initialize database tables
 init_db()
 
+# Auto-seed primary accounts if not present
+try:
+    from app.db.session import SessionLocal
+    from app.models.user import User
+    with SessionLocal() as db:
+        default_emails = [
+            ("GVMSC Contact", "contact.gvmsc@gmail.com"),
+            ("Durga Sandeep", "gvmdurgasandeep@gmail.com"),
+            ("Pranav Sangichetty", "sangichettychettys@gmail.com"),
+        ]
+        for name, email in default_emails:
+            existing = db.query(User).filter(User.email == email.lower()).first()
+            if not existing:
+                db.add(User(
+                    name=name,
+                    email=email.lower(),
+                    password_hash=None,
+                    auth_provider="email",
+                    is_active=True,
+                    is_verified=True,
+                ))
+        db.commit()
+except Exception as e:
+    print(f"[Seed Info]: {e}")
+
 @spaces.GPU
 def gpu_health(text: str) -> str:
     return f"ZeroGPU Online: {text}"

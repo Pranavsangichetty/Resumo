@@ -162,6 +162,7 @@ def forgot_password(
     user = get_user_by_email(db, payload.email)
     email_sent = False
     reset_link = None
+    email_detail = "User not found in database. Please register an account first."
 
     if user:
         token = create_password_reset_token(payload.email)
@@ -171,7 +172,7 @@ def forgot_password(
             else "https://resumo-zeta.vercel.app"
         )
         reset_link = f"{frontend_base}/reset-password?token={token}"
-        email_sent = send_password_reset_email(payload.email, reset_link)
+        email_sent, email_detail = send_password_reset_email(payload.email, reset_link)
 
     return {
         "message": (
@@ -181,6 +182,7 @@ def forgot_password(
         ),
         "email_sent": email_sent,
         "reset_link": reset_link if not email_sent else None,
+        "detail": email_detail,
     }
 
 
