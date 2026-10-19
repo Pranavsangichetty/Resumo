@@ -14,7 +14,23 @@ logger = logging.getLogger(__name__)
 
 def get_resend_api_key() -> str:
     key = os.environ.get("RESEND_API_KEY") or settings.RESEND_API_KEY or ""
-    return key.strip()
+    key = key.strip("'\" \r\n\t")
+    if key.startswith("re_"):
+        return key
+
+    smtp_pwd = os.environ.get("SMTP_PASSWORD") or settings.SMTP_PASSWORD or ""
+    smtp_pwd = smtp_pwd.strip("'\" \r\n\t")
+    if smtp_pwd.startswith("re_"):
+        return smtp_pwd
+
+    # Auto-detect any secret/env variable on the system starting with re_
+    for _, v in os.environ.items():
+        if isinstance(v, str):
+            clean = v.strip("'\" \r\n\t")
+            if clean.startswith("re_") and len(clean) > 10:
+                return clean
+
+    return ""
 
 
 def get_smtp_host() -> str:
