@@ -46,23 +46,9 @@ export default function ForgotPasswordPage() {
         return;
       }
 
-      const rawLink = data.reset_link || null;
-
-      // If we got a direct reset link (local dev or SMTP failed), redirect immediately
-      if (rawLink) {
-        try {
-          const url = new URL(rawLink);
-          router.push(url.pathname + url.search);
-        } catch {
-          router.push(rawLink);
-        }
-        return;
-      }
-
-      // Email was sent successfully, or no user found — show confirmation
       setResult({
         emailSent: Boolean(data.email_sent),
-        resetLink: null,
+        resetLink: data.reset_link || null,
         resetPath: null,
         message: data.message,
       });
@@ -106,11 +92,29 @@ export default function ForgotPasswordPage() {
             <div className="space-y-4">
               {result.emailSent ? (
                 <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-sm text-emerald-400 leading-relaxed">
+                  <div className="flex items-center gap-2 font-semibold mb-1">
+                    <span>✉️</span> Reset Email Sent
+                  </div>
                   A password reset link has been sent to <strong>{email}</strong>. Please check your inbox and spam folder.
+                </div>
+              ) : result.resetLink ? (
+                <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-amber-300 leading-relaxed space-y-3">
+                  <div className="flex items-center gap-2 font-semibold text-amber-200">
+                    <span>ℹ️</span> Reset Link Ready
+                  </div>
+                  <p className="text-xs text-amber-300/90 leading-relaxed">
+                    Email delivery (SMTP) is not configured on this server yet. For testing, you can use the direct link below:
+                  </p>
+                  <Link
+                    href={result.resetLink}
+                    className="block w-full text-center py-2.5 px-4 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-semibold text-xs transition shadow-sm"
+                  >
+                    Proceed to Reset Password →
+                  </Link>
                 </div>
               ) : (
                 <div className="rounded-xl border border-zinc-700 bg-zinc-800/60 p-4 text-sm text-zinc-300 leading-relaxed">
-                  If that email is registered in Resumo, a reset link has been sent to your inbox.
+                  If that email is registered in Resumo, a reset link has been processed.
                 </div>
               )}
 

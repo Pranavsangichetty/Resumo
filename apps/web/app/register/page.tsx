@@ -2,6 +2,7 @@
 
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
+import GoogleSignInButton from "@/components/GoogleSignInButton";
 
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
@@ -96,6 +97,22 @@ export default function RegisterPage() {
           <p className="text-xs text-[var(--text-secondary)] mb-6">
             Start building stronger resumes for every opportunity.
           </p>
+
+          {/* Google Sign Up */}
+          <div className="mb-5">
+            <GoogleSignInButton mode="signup" onError={(err) => setError(err)} />
+          </div>
+
+          <div className="relative mb-5">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-[var(--border)]" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-[var(--bg-surface)] px-2.5 text-[var(--text-muted)] font-medium">
+                or continue with email
+              </span>
+            </div>
+          </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>

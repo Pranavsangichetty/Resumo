@@ -54,3 +54,37 @@ def authenticate_user(
 def reset_user_password(db: Session, user: User, new_password: str) -> None:
     user.password_hash = hash_password(new_password)
     db.commit()
+
+
+def get_or_create_google_user(
+    db: Session,
+    email: str,
+    name: str,
+    google_id: str,
+    avatar_url: str | None = None,
+) -> User:
+    user = get_user_by_email(db, email)
+    if user:
+        if not user.google_id:
+            user.google_id = google_id
+        if avatar_url and not user.avatar_url:
+            user.avatar_url = avatar_url
+        user.is_verified = True
+        db.commit()
+        db.refresh(user)
+        return user
+
+    user = User(
+        name=name or email.split("@")[0],
+        email=email.lower(),
+        password_hash=None,
+        auth_provider="google",
+        google_id=google_id,
+        avatar_url=avatar_url,
+        is_active=True,
+        is_verified=True,
+    )
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+    return user

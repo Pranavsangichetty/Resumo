@@ -1,7 +1,13 @@
+import json
+import logging
+import urllib.parse
+import urllib.request
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.api.dependencies import get_current_user
+from app.core.config import settings
 from app.core.security import (
     create_access_token,
     create_password_reset_token,
@@ -11,6 +17,7 @@ from app.db.session import get_db
 from app.models.user import User
 from app.schemas.auth import (
     ForgotPasswordRequest,
+    GoogleAuthRequest,
     ResetPasswordRequest,
     Token,
     UserCreate,
@@ -20,10 +27,13 @@ from app.schemas.auth import (
 from app.services.auth_service import (
     authenticate_user,
     create_user,
+    get_or_create_google_user,
     get_user_by_email,
     reset_user_password,
 )
 from app.services.email_service import send_password_reset_email
+
+logger = logging.getLogger(__name__)
 
 
 router = APIRouter(
@@ -82,6 +92,65 @@ def login(
         token_type="bearer",
     )
 
+def verify_google_token(credential: str) -> dict | None:
+    try:
+        url = f"https://oauth2.googleapis.com/tokeninfo?id_token={urllib.parse.quote(credential)}"
+        req = urllib.request.Request(url, headers={"User-Agent": "Resumo/1.0"})
+        with urllib.request.urlopen(req, timeout=10) as response:
+            if response.status == 200:
+                data = json.loads(response.read().decode("utf-8"))
+                iss = data.get("iss", "")
+                if "accounts.google.com" in iss or iss == "https://accounts.google.com":
+                    if settings.GOOGLE_CLIENT_ID and data.get("aud") != settings.GOOGLE_CLIENT_ID:
+                        logger.warning("Google token aud mismatch")
+                        return None
+                    return data
+    except Exception as e:
+        logger.error(f"Error validating Google token: {e}")
+    return None
+
+
+@router.post(
+    "/google",
+    response_model=Token,
+    status_code=status.HTTP_200_OK,
+)
+def google_auth(
+    payload: GoogleAuthRequest,
+    db: Session = Depends(get_db),
+):
+    google_data = verify_google_token(payload.credential)
+    if not google_data or not google_data.get("email"):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid or expired Google authentication credential.",
+        )
+
+    email = google_data["email"].lower()
+    name = google_data.get("name") or email.split("@")[0]
+    google_id = google_data.get("sub") or ""
+    avatar_url = google_data.get("picture")
+
+    user = get_or_create_google_user(
+        db=db,
+        email=email,
+        name=name,
+        google_id=google_id,
+        avatar_url=avatar_url,
+    )
+
+    access_token = create_access_token(
+        data={
+            "sub": user.email,
+            "id": user.id,
+        }
+    )
+    return Token(
+        access_token=access_token,
+        token_type="bearer",
+    )
+
+
 @router.post(
     "/forgot-password",
     status_code=status.HTTP_200_OK,
@@ -96,7 +165,12 @@ def forgot_password(
 
     if user:
         token = create_password_reset_token(payload.email)
-        reset_link = f"http://localhost:3000/reset-password?token={token}"
+        frontend_base = (
+            settings.FRONTEND_URL.rstrip("/")
+            if getattr(settings, "FRONTEND_URL", None)
+            else "https://resumo-zeta.vercel.app"
+        )
+        reset_link = f"{frontend_base}/reset-password?token={token}"
         email_sent = send_password_reset_email(payload.email, reset_link)
 
     return {
