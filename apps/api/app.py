@@ -18,6 +18,7 @@ try:
         default_emails = [
             ("GVMSC Contact", "contact.gvmsc@gmail.com"),
             ("Durga Sandeep", "gvmdurgasandeep@gmail.com"),
+            ("Pranav Sangichetty", "sangichettypranav@gmail.com"),
             ("Pranav Sangichetty", "sangichettychettys@gmail.com"),
         ]
         for name, email in default_emails:
