@@ -30,12 +30,12 @@ const INDIA_CITIES = [
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 function typeBadgeClass(type: string) {
   switch (type) {
-    case "Remote":      return "bg-emerald-500/10 border-emerald-500/20 text-emerald-400";
-    case "Hybrid":      return "bg-purple-500/10 border-purple-500/20 text-purple-400";
-    case "Contract":    return "bg-amber-500/10 border-amber-500/20 text-amber-400";
-    case "Part-Time":   return "bg-pink-500/10 border-pink-500/20 text-pink-400";
-    case "Internship":  return "bg-cyan-500/10 border-cyan-500/20 text-cyan-400";
-    default:            return "bg-slate-500/10 border-slate-500/20 text-slate-400";
+    case "Remote":      return "bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400";
+    case "Hybrid":      return "bg-purple-500/10 border-purple-500/20 text-purple-600 dark:text-purple-400";
+    case "Contract":    return "bg-amber-500/10 border-amber-500/20 text-amber-600 dark:text-amber-400";
+    case "Part-Time":   return "bg-pink-500/10 border-pink-500/20 text-pink-600 dark:text-pink-400";
+    case "Internship":  return "bg-cyan-500/10 border-cyan-500/20 text-cyan-600 dark:text-cyan-400";
+    default:            return "bg-slate-500/10 border-slate-500/20 text-slate-600 dark:text-slate-400";
   }
 }
 

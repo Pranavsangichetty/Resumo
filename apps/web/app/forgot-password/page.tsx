@@ -113,7 +113,7 @@ export default function ForgotPasswordPage() {
                   </Link>
                 </div>
               ) : (
-                <div className="rounded-xl border border-zinc-700 bg-zinc-800/60 p-4 text-sm text-zinc-300 leading-relaxed">
+                <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-muted)] p-4 text-sm text-[var(--text-secondary)] leading-relaxed">
                   If that email is registered in Resumo, a reset link has been processed.
                 </div>
               )}
