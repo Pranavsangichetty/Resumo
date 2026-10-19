@@ -1,5 +1,8 @@
+import json
 import logging
 import smtplib
+import urllib.parse
+import urllib.request
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
@@ -9,7 +12,9 @@ logger = logging.getLogger(__name__)
 
 
 def is_smtp_configured() -> bool:
-    """Check if SMTP credentials are valid and not default placeholders."""
+    """Check if Resend API key or SMTP credentials are valid."""
+    if settings.RESEND_API_KEY and settings.RESEND_API_KEY.strip().startswith("re_"):
+        return True
     if not settings.SMTP_HOST or not settings.SMTP_USERNAME or not settings.SMTP_PASSWORD:
         return False
     if settings.SMTP_PASSWORD in ("your_app_password", "your_password", "password", ""):
@@ -17,9 +22,39 @@ def is_smtp_configured() -> bool:
     return True
 
 
+def send_via_resend(to_email: str, subject: str, html_content: str, text_content: str) -> bool:
+    """Send email using Resend REST API."""
+    try:
+        url = "https://api.resend.com/emails"
+        headers = {
+            "Authorization": f"Bearer {settings.RESEND_API_KEY.strip()}",
+            "Content-Type": "application/json",
+            "User-Agent": "Resumo/1.0",
+        }
+        sender = settings.SMTP_FROM or "Resumo <onboarding@resend.dev>"
+        payload = {
+            "from": sender,
+            "to": [to_email],
+            "subject": subject,
+            "html": html_content,
+            "text": text_content,
+        }
+        data = json.dumps(payload).encode("utf-8")
+        req = urllib.request.Request(url, data=data, headers=headers, method="POST")
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            if resp.status in (200, 201):
+                logger.info(f"[Resend] Email sent successfully to {to_email}")
+                print(f"[SUCCESS] [Resend] Password reset email sent to {to_email}")
+                return True
+    except Exception as e:
+        logger.error(f"[Resend Error] Failed to send email to {to_email}: {e}")
+        print(f"[ERROR] [Resend Error]: {e}")
+    return False
+
+
 def send_password_reset_email(to_email: str, reset_link: str) -> bool:
     """
-    Attempts to send a password reset email via SMTP.
+    Attempts to send a password reset email via Resend API or SMTP.
     Returns True if sent successfully, False otherwise.
     Always prints the reset link to the console for easy local access.
     """
@@ -30,7 +65,7 @@ def send_password_reset_email(to_email: str, reset_link: str) -> bool:
 
     if not is_smtp_configured():
         logger.warning(
-            f"SMTP not configured with real password (placeholder detected). "
+            f"No email provider configured (Resend or SMTP). "
             f"Reset link printed to terminal for {to_email}."
         )
         return False
@@ -71,6 +106,9 @@ def send_password_reset_email(to_email: str, reset_link: str) -> bool:
 
     msg.attach(MIMEText(text, "plain"))
     msg.attach(MIMEText(html, "html"))
+
+    if settings.RESEND_API_KEY and settings.RESEND_API_KEY.strip().startswith("re_"):
+        return send_via_resend(to_email, "Resumo - Reset Your Password", html, text)
 
     try:
         with smtplib.SMTP(settings.SMTP_HOST, settings.SMTP_PORT, timeout=10) as server:

@@ -18,6 +18,7 @@ class Settings(BaseSettings):
     GEMINI_API_KEY: str = ""
     FRONTEND_URL: str = "https://resumo-zeta.vercel.app"
     GOOGLE_CLIENT_ID: str = ""
+    RESEND_API_KEY: str = ""
 
     @field_validator("DATABASE_URL", mode="after")
     @classmethod
