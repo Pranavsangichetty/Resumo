@@ -54,12 +54,12 @@ export default function GoogleSignInButton({
       });
 
       window.google.accounts.id.renderButton(buttonRef.current, {
-        theme: "outline",
+        theme: "filled_black",
         size: "large",
         type: "standard",
         text: mode === "signup" ? "signup_with" : "signin_with",
-        shape: "rectangular",
-        logo_alignment: "center",
+        shape: "pill",
+        logo_alignment: "left",
         width: 384,
       });
     }
@@ -129,14 +129,17 @@ export default function GoogleSignInButton({
     <div className="w-full space-y-2">
       {GOOGLE_CLIENT_ID ? (
         <div className="w-full flex justify-center">
-          <div ref={buttonRef} className="w-full flex justify-center" />
+          <div
+            ref={buttonRef}
+            className="w-full flex justify-center min-h-[44px] [&_iframe]:!rounded-full [&_iframe]:!overflow-hidden shadow-sm"
+          />
         </div>
       ) : (
         <button
           type="button"
           onClick={handleFallbackClick}
           disabled={loading}
-          className="w-full flex items-center justify-center gap-3 rounded-xl border border-[var(--border)] bg-[var(--bg-muted)] hover:bg-[var(--bg-surface)] py-3 px-4 text-sm font-medium text-[var(--text-primary)] transition hover:border-indigo-500/40 shadow-sm"
+          className="w-full flex items-center justify-center gap-3 rounded-full border border-[var(--border)] bg-[#131314] hover:bg-[#1a1b20] py-2.5 px-4 text-sm font-medium text-white transition hover:border-indigo-500/40 shadow-sm"
         >
           <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24">
             <path
