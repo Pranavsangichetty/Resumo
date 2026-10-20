@@ -58,14 +58,18 @@ export function Chatbot() {
       <button
         aria-label="Open Resumo Assistant"
         onClick={() => setOpen(true)}
-        className="btn-indigo-glow fixed bottom-6 right-6 z-50 rounded-full p-4 text-white shadow-2xl transition hover:scale-105 active:scale-95"
+        style={{ position: "fixed" }}
+        className="btn-indigo-glow !fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 rounded-full p-3.5 sm:p-4 text-white shadow-2xl transition hover:scale-105 active:scale-95"
       >
         <MessageCircle size={22} />
       </button>
     );
 
   return (
-    <div className="card-glow fixed bottom-6 right-6 z-50 flex h-[540px] w-[370px] max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-2xl backdrop-blur-2xl">
+    <div
+      style={{ position: "fixed" }}
+      className="card-glow !fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 flex h-[520px] max-h-[82vh] w-[360px] max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-2xl backdrop-blur-2xl"
+    >
       {/* Header */}
       <header className="flex items-center justify-between border-b border-[var(--border)] bg-[var(--bg-muted)]/80 p-4">
         <div className="flex items-center gap-2.5">
@@ -81,7 +85,8 @@ export function Chatbot() {
         </div>
         <button
           onClick={() => setOpen(false)}
-          className="rounded-lg p-1 text-[var(--text-muted)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)] transition"
+          className="rounded-lg p-1.5 text-[var(--text-muted)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)] transition"
+          aria-label="Close assistant"
         >
           <X size={18} />
         </button>
@@ -144,6 +149,7 @@ export function Chatbot() {
           type="submit"
           disabled={!input.trim() || loading}
           className="btn-indigo-glow rounded-xl p-2.5 text-white transition disabled:opacity-40"
+          aria-label="Send message"
         >
           <Send size={15} />
         </button>
