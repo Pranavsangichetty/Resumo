@@ -247,7 +247,7 @@ export default function ATSPage() {
   // ====================================================
 
   return (
-    <main className="min-h-screen bg-[var(--bg-base)] p-6 md:p-10">
+    <main className="min-h-screen bg-[var(--bg-base)] px-4 py-6 sm:px-6 md:p-10">
 
       <div className="mx-auto max-w-6xl">
 

@@ -160,7 +160,7 @@ export default function ApplicationsPage() {
     "w-full rounded-lg border border-[var(--border)] bg-[var(--bg-muted)] px-4 py-2.5 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] outline-none transition focus:border-blue-500";
 
   return (
-    <main className="min-h-screen bg-[var(--bg-base)] p-8 md:p-12 text-[var(--text-primary)]">
+    <main className="min-h-screen bg-[var(--bg-base)] px-4 py-6 sm:px-6 md:p-12 text-[var(--text-primary)]">
       <div className="mx-auto max-w-6xl">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[var(--border)] pb-6 mb-8">
           <div>

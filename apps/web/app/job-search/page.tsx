@@ -420,7 +420,7 @@ export default function JobSearchPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[var(--bg-base)] p-6 md:p-10 text-[var(--text-primary)]">
+    <main className="min-h-screen bg-[var(--bg-base)] px-4 py-6 sm:px-6 md:p-10 text-[var(--text-primary)]">
       <div className="mx-auto max-w-6xl">
 
         {/* Header */}

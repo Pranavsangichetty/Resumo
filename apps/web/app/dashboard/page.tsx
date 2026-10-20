@@ -174,7 +174,7 @@ export default function Dashboard() {
   }
 
   return (
-    <main className="min-h-screen bg-[var(--bg-base)] text-[var(--text-primary)] p-6 md:p-12 relative overflow-hidden">
+    <main className="min-h-screen bg-[var(--bg-base)] text-[var(--text-primary)] px-4 py-6 sm:px-6 md:p-12 relative overflow-hidden">
       {/* Subtle Background Glow Radial Accent */}
       <div className="pointer-events-none absolute -top-40 left-1/2 -translate-x-1/2 h-[500px] w-[800px] rounded-full bg-indigo-600/10 blur-[120px]" />
 

@@ -198,7 +198,7 @@ export default function SettingsPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[var(--bg-base)] p-8 md:p-12 text-[var(--text-primary)]">
+    <main className="min-h-screen bg-[var(--bg-base)] px-4 py-6 sm:px-6 md:p-12 text-[var(--text-primary)]">
       <div className="mx-auto max-w-4xl">
         {/* Header */}
         <div className="flex items-center justify-between gap-4 border-b border-[var(--border)] pb-6 mb-8">

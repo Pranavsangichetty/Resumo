@@ -145,7 +145,7 @@ export default function CoverLetterPage() {
     "w-full rounded-xl border border-[var(--border)] bg-[var(--bg-muted)] px-3.5 py-2.5 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20";
 
   return (
-    <main className="min-h-screen bg-[var(--bg-base)] p-6 md:p-10 text-[var(--text-primary)]">
+    <main className="min-h-screen bg-[var(--bg-base)] px-4 py-6 sm:px-6 md:p-10 text-[var(--text-primary)]">
       <div className="mx-auto max-w-6xl">
         {/* Header */}
         <div className="border-b border-[var(--border)] pb-6 mb-8">
