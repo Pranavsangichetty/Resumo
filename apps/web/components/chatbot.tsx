@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { MessageCircle, X, Send } from "lucide-react";
 
 type Msg = { role: "user" | "assistant"; content: string };
@@ -16,6 +16,35 @@ export function Chatbot() {
         "Hi! I'm your Resumo Assistant. How can I assist you with resume optimization, job requirements, or interview prep today?",
     },
   ]);
+
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = (smooth = true) => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({
+        behavior: smooth ? "smooth" : "auto",
+        block: "end",
+      });
+    } else if (messagesContainerRef.current) {
+      messagesContainerRef.current.scrollTop =
+        messagesContainerRef.current.scrollHeight;
+    }
+  };
+
+  // When assistant window opens, jump immediately to latest message
+  useEffect(() => {
+    if (open) {
+      setTimeout(() => scrollToBottom(false), 50);
+    }
+  }, [open]);
+
+  // When new messages arrive or loading state changes, smoothly scroll to bottom
+  useEffect(() => {
+    if (open) {
+      scrollToBottom(true);
+    }
+  }, [messages, loading, open]);
 
   async function send(text?: string) {
     const value = (text ?? input).trim();
@@ -71,7 +100,7 @@ export function Chatbot() {
       className="card-glow !fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 flex h-[520px] max-h-[82vh] w-[360px] max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-2xl backdrop-blur-2xl"
     >
       {/* Header */}
-      <header className="flex items-center justify-between border-b border-[var(--border)] bg-[var(--bg-muted)]/80 p-4">
+      <header className="flex items-center justify-between border-b border-[var(--border)] bg-[var(--bg-muted)]/80 p-4 shrink-0">
         <div className="flex items-center gap-2.5">
           <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 font-bold text-sm">
             R
@@ -93,7 +122,10 @@ export function Chatbot() {
       </header>
 
       {/* Messages */}
-      <div className="flex-1 space-y-3 overflow-y-auto p-4">
+      <div
+        ref={messagesContainerRef}
+        className="flex-1 space-y-3 overflow-y-auto p-4 scroll-smooth"
+      >
         {messages.map((m, i) => (
           <div
             key={i}
@@ -129,6 +161,7 @@ export function Chatbot() {
             <span>Thinking…</span>
           </div>
         )}
+        <div ref={messagesEndRef} className="h-0 w-0" />
       </div>
 
       {/* Input */}
@@ -137,7 +170,7 @@ export function Chatbot() {
           e.preventDefault();
           send();
         }}
-        className="flex gap-2 border-t border-[var(--border)] bg-[var(--bg-muted)]/50 p-3"
+        className="flex gap-2 border-t border-[var(--border)] bg-[var(--bg-muted)]/50 p-3 shrink-0"
       >
         <input
           value={input}
