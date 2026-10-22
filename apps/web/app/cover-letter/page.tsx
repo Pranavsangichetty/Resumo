@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { exportCoverLetterPDF, exportCoverLetterDOCX } from "@/lib/coverLetterExporter";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
@@ -43,7 +44,9 @@ export default function CoverLetterPage() {
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState("");
   const [result, setResult] = useState<CoverLetterResult | null>(null);
+  const [letterContent, setLetterContent] = useState("");
   const [copied, setCopied] = useState(false);
+  const [downloadingFormat, setDownloadingFormat] = useState<"pdf" | "docx" | null>(null);
 
   // Load Saved Resumes
   useEffect(() => {
@@ -127,6 +130,7 @@ export default function CoverLetterPage() {
         throw new Error(data.detail || "Failed to generate cover letter.");
       }
       setResult(data);
+      setLetterContent(data.cover_letter);
     } catch (err: any) {
       setError(err.message || "Failed to generate cover letter. Please try again.");
     } finally {
@@ -135,10 +139,51 @@ export default function CoverLetterPage() {
   }
 
   function copyToClipboard() {
-    if (!result) return;
-    navigator.clipboard.writeText(result.cover_letter);
+    const textToCopy = letterContent || result?.cover_letter || "";
+    if (!textToCopy) return;
+    navigator.clipboard.writeText(textToCopy);
     setCopied(true);
     setTimeout(() => setCopied(false), 2500);
+  }
+
+  async function handleDownloadPDF() {
+    const textToExport = letterContent.trim() || result?.cover_letter || "";
+    if (!textToExport) return;
+    setDownloadingFormat("pdf");
+    try {
+      await exportCoverLetterPDF({
+        text: textToExport,
+        company: company,
+        jobTitle: jobTitle,
+        subjectLine: result?.subject_line,
+        recipient: recipient,
+      });
+    } catch (err) {
+      console.error("PDF export error:", err);
+      setError("Failed to generate PDF. Please try again.");
+    } finally {
+      setDownloadingFormat(null);
+    }
+  }
+
+  async function handleDownloadDOCX() {
+    const textToExport = letterContent.trim() || result?.cover_letter || "";
+    if (!textToExport) return;
+    setDownloadingFormat("docx");
+    try {
+      await exportCoverLetterDOCX({
+        text: textToExport,
+        company: company,
+        jobTitle: jobTitle,
+        subjectLine: result?.subject_line,
+        recipient: recipient,
+      });
+    } catch (err) {
+      console.error("DOCX export error:", err);
+      setError("Failed to generate Word (.docx) document. Please try again.");
+    } finally {
+      setDownloadingFormat(null);
+    }
   }
 
   const inputClass =
@@ -163,12 +208,47 @@ export default function CoverLetterPage() {
               </p>
             </div>
             {result && (
-              <button
-                onClick={copyToClipboard}
-                className="self-start sm:self-auto rounded-xl border border-blue-500/30 bg-blue-500/10 px-4 py-2 text-xs font-semibold text-blue-400 transition hover:bg-blue-500/20"
-              >
-                {copied ? "✓ Copied to Clipboard!" : "Copy Full Text"}
-              </button>
+              <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
+                <button
+                  type="button"
+                  onClick={handleDownloadPDF}
+                  disabled={downloadingFormat !== null}
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/20 px-3.5 py-2 text-xs font-semibold text-rose-400 transition disabled:opacity-50"
+                  title="Download clean, ATS-compliant PDF"
+                >
+                  <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                    <polyline points="14 2 14 8 20 8" />
+                    <line x1="12" y1="18" x2="12" y2="12" />
+                    <polyline points="9 15 12 18 15 15" />
+                  </svg>
+                  {downloadingFormat === "pdf" ? "Exporting PDF..." : "Download PDF"}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleDownloadDOCX}
+                  disabled={downloadingFormat !== null}
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-blue-500/30 bg-blue-500/10 hover:bg-blue-500/20 px-3.5 py-2 text-xs font-semibold text-blue-400 transition disabled:opacity-50"
+                  title="Download editable Microsoft Word .docx"
+                >
+                  <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                    <polyline points="14 2 14 8 20 8" />
+                    <line x1="12" y1="18" x2="12" y2="12" />
+                    <polyline points="9 15 12 18 15 15" />
+                  </svg>
+                  {downloadingFormat === "docx" ? "Exporting Word..." : "Download Word (.docx)"}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={copyToClipboard}
+                  className="rounded-xl border border-[var(--border)] bg-[var(--bg-muted)] hover:bg-[var(--bg-surface-elevated)] px-3.5 py-2 text-xs font-semibold text-[var(--text-secondary)] transition"
+                >
+                  {copied ? "✓ Copied!" : "Copy Text"}
+                </button>
+              </div>
             )}
           </div>
         </div>
@@ -432,17 +512,38 @@ export default function CoverLetterPage() {
                         {result.subject_line}
                       </p>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-2">
                       {result.word_count && (
                         <span className="rounded-lg bg-[var(--bg-muted)] border border-[var(--border)] px-2.5 py-1 text-xs font-medium text-[var(--text-muted)]">
                           {result.word_count} words
                         </span>
                       )}
                       <button
-                        onClick={copyToClipboard}
-                        className="rounded-xl border border-blue-500/30 bg-blue-500/10 px-3.5 py-1.5 text-xs font-semibold text-blue-400 transition hover:bg-blue-500/20"
+                        type="button"
+                        onClick={handleDownloadPDF}
+                        disabled={downloadingFormat !== null}
+                        className="inline-flex items-center gap-1 rounded-xl bg-gradient-to-r from-rose-600 to-rose-500 hover:from-rose-500 hover:to-rose-400 text-white px-3 py-1.5 text-xs font-semibold shadow-sm transition disabled:opacity-50"
+                        title="Download ATS-ready PDF"
                       >
-                        {copied ? "✓ Copied!" : "Copy Full Text"}
+                        <span>📄</span>
+                        {downloadingFormat === "pdf" ? "Exporting..." : "PDF"}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleDownloadDOCX}
+                        disabled={downloadingFormat !== null}
+                        className="inline-flex items-center gap-1 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white px-3 py-1.5 text-xs font-semibold shadow-sm transition disabled:opacity-50"
+                        title="Download editable Microsoft Word .docx"
+                      >
+                        <span>📝</span>
+                        {downloadingFormat === "docx" ? "Exporting..." : "Word (.docx)"}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={copyToClipboard}
+                        className="rounded-xl border border-[var(--border)] bg-[var(--bg-muted)] hover:bg-[var(--bg-surface-elevated)] px-3 py-1.5 text-xs font-semibold text-[var(--text-primary)] transition"
+                      >
+                        {copied ? "✓ Copied!" : "Copy"}
                       </button>
                     </div>
                   </div>
@@ -461,9 +562,19 @@ export default function CoverLetterPage() {
                     </div>
                   )}
 
-                  {/* Letter Body */}
-                  <div className="whitespace-pre-wrap font-sans text-sm leading-relaxed text-[var(--text-primary)] max-h-[580px] overflow-y-auto p-3 rounded-xl bg-[var(--bg-muted)] border border-[var(--border)]">
-                    {result.cover_letter}
+                  {/* Letter Body (Editable before download) */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-[11px] text-[var(--text-muted)]">
+                      <span>✏️ You can edit your cover letter directly before downloading</span>
+                      <span>{letterContent.length} characters</span>
+                    </div>
+                    <textarea
+                      value={letterContent}
+                      onChange={(e) => setLetterContent(e.target.value)}
+                      rows={16}
+                      className="w-full font-sans text-sm leading-relaxed text-[var(--text-primary)] p-4 rounded-xl bg-[var(--bg-muted)] border border-[var(--border)] outline-none focus:border-blue-500 transition resize-y font-normal"
+                      placeholder="Cover letter text..."
+                    />
                   </div>
                 </div>
               </div>
