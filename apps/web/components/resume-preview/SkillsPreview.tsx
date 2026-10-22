@@ -15,7 +15,7 @@ export default function SkillsPreview({
 
   return (
     <PreviewSection title="Technical Skills">
-      <p className="leading-5">
+      <p className="leading-5 break-words [overflow-wrap:anywhere]">
         {skills.join(" • ")}
       </p>
     </PreviewSection>

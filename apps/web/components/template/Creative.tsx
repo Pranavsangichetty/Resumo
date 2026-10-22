@@ -23,6 +23,7 @@ export default function Creative({ data }: CreativeProps) {
     <article
       style={{
         maxWidth: "850px",
+        width: "100%",
         margin: "0 auto",
         display: "grid",
         gridTemplateColumns: "240px 1fr",
@@ -32,14 +33,19 @@ export default function Creative({ data }: CreativeProps) {
         lineHeight: "1.5",
         color: "#1a1a1a",
         minHeight: "100%",
+        boxSizing: "border-box",
       }}
     >
       {/* SIDEBAR */}
       <aside
         style={{
           background: "linear-gradient(180deg, #7c3aed 0%, #4f46e5 50%, #2563eb 100%)",
-          padding: "36px 22px",
+          padding: "36px 20px",
           color: "#ffffff",
+          boxSizing: "border-box",
+          minWidth: 0,
+          wordBreak: "break-word",
+          overflowWrap: "anywhere",
         }}
       >
         {/* Initials Circle */}
@@ -128,7 +134,7 @@ export default function Creative({ data }: CreativeProps) {
 
         {/* Skills */}
         {data.skills.length > 0 && (
-          <div style={{ marginTop: "24px" }}>
+          <div style={{ marginTop: "24px", minWidth: 0 }}>
             <h2
               style={{
                 fontSize: "10px",
@@ -141,7 +147,7 @@ export default function Creative({ data }: CreativeProps) {
             >
               Skills
             </h2>
-            <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: "6px", width: "100%", boxSizing: "border-box" }}>
               {data.skills.map((skill) => (
                 <div
                   key={skill}
@@ -151,6 +157,10 @@ export default function Creative({ data }: CreativeProps) {
                     borderRadius: "6px",
                     fontSize: "11px",
                     color: "#ffffff",
+                    wordBreak: "break-word",
+                    overflowWrap: "anywhere",
+                    boxSizing: "border-box",
+                    maxWidth: "100%",
                   }}
                 >
                   {skill}

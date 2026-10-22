@@ -299,7 +299,7 @@ export default function Minimal({
       {data.skills.length > 0 && (
         <Section title="Skills">
 
-          <p className="max-w-3xl text-sm text-zinc-600">
+          <p className="max-w-3xl text-sm text-zinc-600 break-words [overflow-wrap:anywhere]">
             {data.skills.join(" · ")}
           </p>
 

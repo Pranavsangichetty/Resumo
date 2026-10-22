@@ -316,11 +316,13 @@ export default function Google({ data }: GoogleProps) {
         {/* SKILLS */}
         {data.skills.length > 0 && (
           <Section title="Skills" color="#4285f4">
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", width: "100%", boxSizing: "border-box" }}>
               {data.skills.map((skill, i) => (
                 <span
                   key={skill}
                   style={{
+                    display: "inline-block",
+                    maxWidth: "100%",
                     padding: "4px 14px",
                     borderRadius: "16px",
                     fontSize: "12px",
@@ -328,6 +330,10 @@ export default function Google({ data }: GoogleProps) {
                     backgroundColor: `${colors[i % colors.length]}12`,
                     color: colors[i % colors.length],
                     border: `1px solid ${colors[i % colors.length]}30`,
+                    wordBreak: "break-word",
+                    overflowWrap: "anywhere",
+                    whiteSpace: "normal",
+                    boxSizing: "border-box",
                   }}
                 >
                   {skill}

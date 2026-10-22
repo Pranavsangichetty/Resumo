@@ -285,7 +285,7 @@ export default function Harvard({ data }: HarvardProps) {
       {/* SKILLS */}
       {data.skills.length > 0 && (
         <Section title="Skills">
-          <p style={{ lineHeight: "1.8" }}>{data.skills.join(", ")}</p>
+          <p style={{ lineHeight: "1.8", wordBreak: "break-word", overflowWrap: "anywhere" }}>{data.skills.join(", ")}</p>
         </Section>
       )}
 

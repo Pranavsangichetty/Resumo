@@ -396,18 +396,26 @@ export default function Elegant({ data }: ElegantProps) {
                 display: "flex",
                 flexWrap: "wrap",
                 gap: "6px",
+                width: "100%",
+                boxSizing: "border-box",
               }}
             >
               {data.skills.map((skill) => (
                 <span
                   key={skill}
                   style={{
+                    display: "inline-block",
+                    maxWidth: "100%",
                     padding: "3px 14px",
                     border: "1px solid #d4af37",
                     borderRadius: "2px",
                     fontSize: "12px",
                     color: "#8b7355",
                     fontFamily: "'Segoe UI', sans-serif",
+                    wordBreak: "break-word",
+                    overflowWrap: "anywhere",
+                    whiteSpace: "normal",
+                    boxSizing: "border-box",
                   }}
                 >
                   {skill}

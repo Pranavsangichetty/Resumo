@@ -162,7 +162,7 @@ export default function Cloud({ data }: CloudProps) {
       {/* Skills */}
       {data.skills.length > 0 && (
         <Section title="Skills">
-          <p style={{ fontSize: "11.5px", margin: 0, lineHeight: "1.6" }}>
+          <p style={{ fontSize: "11.5px", margin: 0, lineHeight: "1.6", wordBreak: "break-word", overflowWrap: "anywhere" }}>
             {data.skills.join(", ")}
           </p>
         </Section>

@@ -455,8 +455,8 @@ export default function ResumeBuilderPage() {
             </div>
 
             {/* Modal Scrollable Body */}
-            <div className="flex-1 overflow-y-auto p-6 bg-zinc-950/60 flex justify-center">
-              <div className="w-full max-w-[850px] shadow-2xl rounded-lg overflow-hidden bg-white text-zinc-900">
+            <div className="flex-1 overflow-y-auto overflow-x-auto p-4 sm:p-6 bg-zinc-950/60 flex justify-center">
+              <div className="w-full max-w-[850px] min-w-[700px] sm:min-w-0 shadow-2xl rounded-lg overflow-hidden bg-white text-zinc-900">
                 <TemplateRenderer
                   data={SAMPLE_RESUME_DATA}
                   template={previewTemplate}

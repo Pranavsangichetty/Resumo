@@ -15,22 +15,41 @@ export default function PrintResumeButton() {
 
     setDownloading(true);
 
-    const prev = {
-      width: el.style.width,
-      maxWidth: el.style.maxWidth,
-      padding: el.style.padding,
-    };
+    let container: HTMLDivElement | null = null;
 
     try {
-      el.style.width = `${A4_W}px`;
-      el.style.maxWidth = `${A4_W}px`;
-      el.style.padding = "36px";
+      // Create an isolated off-screen sandbox container with fixed A4 desktop dimensions
+      container = document.createElement("div");
+      container.style.position = "fixed";
+      container.style.left = "-9999px";
+      container.style.top = "0";
+      container.style.width = `${A4_W}px`;
+      container.style.minWidth = `${A4_W}px`;
+      container.style.maxWidth = `${A4_W}px`;
+      container.style.backgroundColor = "#ffffff";
+      container.style.zIndex = "-9999";
+      container.style.overflow = "visible";
 
-      const canvas = await html2canvas(el, {
+      const clone = el.cloneNode(true) as HTMLElement;
+      clone.style.width = `${A4_W}px`;
+      clone.style.minWidth = `${A4_W}px`;
+      clone.style.maxWidth = `${A4_W}px`;
+      clone.style.padding = "36px";
+      clone.style.margin = "0";
+      clone.style.boxSizing = "border-box";
+
+      container.appendChild(clone);
+      document.body.appendChild(container);
+
+      // Force layout calculation
+      void container.offsetHeight;
+
+      const canvas = await html2canvas(clone, {
         scale: 2,
         useCORS: true,
         backgroundColor: "#ffffff",
         width: A4_W,
+        windowWidth: 1200, // Forces full desktop layout calculation regardless of mobile screen
       });
 
       const imgW = 210;
@@ -48,7 +67,9 @@ export default function PrintResumeButton() {
     } catch (err) {
       console.error("PDF download failed:", err);
     } finally {
-      Object.assign(el.style, prev);
+      if (container && container.parentNode) {
+        container.parentNode.removeChild(container);
+      }
       setDownloading(false);
     }
   }

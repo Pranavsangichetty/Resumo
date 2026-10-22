@@ -326,8 +326,10 @@ export default function Executive({ data }: ExecutiveProps) {
             <div
               style={{
                 display: "grid",
-                gridTemplateColumns: "1fr 1fr",
-                gap: "6px 24px",
+                gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))",
+                gap: "6px 20px",
+                width: "100%",
+                boxSizing: "border-box",
               }}
             >
               {data.skills.map((skill) => (
@@ -338,6 +340,9 @@ export default function Executive({ data }: ExecutiveProps) {
                     alignItems: "center",
                     gap: "8px",
                     fontSize: "13px",
+                    minWidth: 0,
+                    overflowWrap: "anywhere",
+                    wordBreak: "break-word",
                   }}
                 >
                   <span
@@ -349,7 +354,7 @@ export default function Executive({ data }: ExecutiveProps) {
                       flexShrink: 0,
                     }}
                   />
-                  <span>{skill}</span>
+                  <span style={{ overflowWrap: "anywhere", wordBreak: "break-word", minWidth: 0 }}>{skill}</span>
                 </div>
               ))}
             </div>

@@ -220,12 +220,16 @@ export default function ATSProfessional({
                 display: "flex",
                 flexWrap: "wrap",
                 gap: "6px 8px",
+                width: "100%",
+                boxSizing: "border-box",
               }}
             >
               {data.skills.map((skill) => (
                 <span
                   key={skill}
                   style={{
+                    display: "inline-block",
+                    maxWidth: "100%",
                     padding: "3px 10px",
                     backgroundColor: "#f1f5f9",
                     borderRadius: "4px",
@@ -233,6 +237,10 @@ export default function ATSProfessional({
                     fontWeight: 500,
                     color: "#0f172a",
                     border: "1px solid #e2e8f0",
+                    wordBreak: "break-word",
+                    overflowWrap: "anywhere",
+                    whiteSpace: "normal",
+                    boxSizing: "border-box",
                   }}
                 >
                   {skill}

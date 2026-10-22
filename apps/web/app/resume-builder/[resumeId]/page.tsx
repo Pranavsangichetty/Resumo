@@ -2034,17 +2034,19 @@ export default function ResumeEditorPage() {
                 }
               />
 
-              <div className="print-resume mt-4 min-h-[900px] bg-white p-8 text-black shadow-sm ring-1 ring-zinc-200 md:p-10">
+              <div className="w-full overflow-x-auto pb-4">
+                <div className="print-resume mt-4 min-h-[900px] min-w-[760px] lg:min-w-0 bg-white p-6 sm:p-8 text-black shadow-sm ring-1 ring-zinc-200 md:p-10">
 
                 <TemplateRenderer
                   data={resumeData}
                   template={
                     selectedTemplate
                   }
-                />
-
-              </div>
-
+                />
+
+              </div>
+              </div>
+
             </div>
 
           </div>

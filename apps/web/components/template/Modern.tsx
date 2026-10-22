@@ -23,6 +23,7 @@ export default function Modern({ data }: ModernProps) {
     <article
       style={{
         maxWidth: "850px",
+        width: "100%",
         margin: "0 auto",
         display: "grid",
         gridTemplateColumns: "260px 1fr",
@@ -32,14 +33,19 @@ export default function Modern({ data }: ModernProps) {
         lineHeight: "1.5",
         color: "#1a1a1a",
         minHeight: "100%",
+        boxSizing: "border-box",
       }}
     >
       {/* SIDEBAR */}
       <aside
         style={{
           background: "linear-gradient(180deg, #0f172a 0%, #1e293b 100%)",
-          padding: "36px 24px",
+          padding: "36px 20px",
           color: "#e2e8f0",
+          boxSizing: "border-box",
+          minWidth: 0,
+          wordBreak: "break-word",
+          overflowWrap: "anywhere",
         }}
       >
         {/* Name */}
@@ -50,6 +56,7 @@ export default function Modern({ data }: ModernProps) {
             color: "#ffffff",
             lineHeight: "1.2",
             margin: 0,
+            wordBreak: "break-word",
           }}
         >
           {personal.fullName || "Your Name"}
@@ -58,46 +65,46 @@ export default function Modern({ data }: ModernProps) {
         {/* Contact */}
         <div style={{ marginTop: "20px" }}>
           {personal.email && (
-            <div style={{ display: "flex", alignItems: "center", gap: "8px", marginTop: "8px", fontSize: "12px" }}>
-              <span style={{ color: "#60a5fa" }}>✉</span>
-              <span style={{ wordBreak: "break-all" }}>{personal.email}</span>
+            <div style={{ display: "flex", alignItems: "flex-start", gap: "8px", marginTop: "8px", fontSize: "12px", minWidth: 0 }}>
+              <span style={{ color: "#60a5fa", flexShrink: 0, marginTop: "2px" }}>✉</span>
+              <span style={{ wordBreak: "break-all", overflowWrap: "anywhere", minWidth: 0 }}>{personal.email}</span>
             </div>
           )}
           {personal.phone && (
-            <div style={{ display: "flex", alignItems: "center", gap: "8px", marginTop: "8px", fontSize: "12px" }}>
-              <span style={{ color: "#60a5fa" }}>☎</span>
-              <span>{personal.phone}</span>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px", marginTop: "8px", fontSize: "12px", minWidth: 0 }}>
+              <span style={{ color: "#60a5fa", flexShrink: 0 }}>☎</span>
+              <span style={{ wordBreak: "break-word" }}>{personal.phone}</span>
             </div>
           )}
           {personal.location && (
-            <div style={{ display: "flex", alignItems: "center", gap: "8px", marginTop: "8px", fontSize: "12px" }}>
-              <span style={{ color: "#60a5fa" }}>⊕</span>
-              <span>{personal.location}</span>
+            <div style={{ display: "flex", alignItems: "flex-start", gap: "8px", marginTop: "8px", fontSize: "12px", minWidth: 0 }}>
+              <span style={{ color: "#60a5fa", flexShrink: 0, marginTop: "2px" }}>⊕</span>
+              <span style={{ wordBreak: "break-word" }}>{personal.location}</span>
             </div>
           )}
           {personal.linkedin && (
-            <div style={{ display: "flex", alignItems: "center", gap: "8px", marginTop: "8px", fontSize: "12px" }}>
-              <span style={{ color: "#60a5fa" }}>in</span>
-              <span style={{ wordBreak: "break-all" }}>{personal.linkedin}</span>
+            <div style={{ display: "flex", alignItems: "flex-start", gap: "8px", marginTop: "8px", fontSize: "12px", minWidth: 0 }}>
+              <span style={{ color: "#60a5fa", flexShrink: 0, marginTop: "2px" }}>in</span>
+              <span style={{ wordBreak: "break-all", overflowWrap: "anywhere", minWidth: 0 }}>{personal.linkedin}</span>
             </div>
           )}
           {personal.github && (
-            <div style={{ display: "flex", alignItems: "center", gap: "8px", marginTop: "8px", fontSize: "12px" }}>
-              <span style={{ color: "#60a5fa" }}>⌂</span>
-              <span style={{ wordBreak: "break-all" }}>{personal.github}</span>
+            <div style={{ display: "flex", alignItems: "flex-start", gap: "8px", marginTop: "8px", fontSize: "12px", minWidth: 0 }}>
+              <span style={{ color: "#60a5fa", flexShrink: 0, marginTop: "2px" }}>⌂</span>
+              <span style={{ wordBreak: "break-all", overflowWrap: "anywhere", minWidth: 0 }}>{personal.github}</span>
             </div>
           )}
           {personal.portfolio && (
-            <div style={{ display: "flex", alignItems: "center", gap: "8px", marginTop: "8px", fontSize: "12px" }}>
-              <span style={{ color: "#60a5fa" }}>◈</span>
-              <span style={{ wordBreak: "break-all" }}>{personal.portfolio}</span>
+            <div style={{ display: "flex", alignItems: "flex-start", gap: "8px", marginTop: "8px", fontSize: "12px", minWidth: 0 }}>
+              <span style={{ color: "#60a5fa", flexShrink: 0, marginTop: "2px" }}>◈</span>
+              <span style={{ wordBreak: "break-all", overflowWrap: "anywhere", minWidth: 0 }}>{personal.portfolio}</span>
             </div>
           )}
         </div>
 
         {/* Skills */}
         {data.skills.length > 0 && (
-          <div style={{ marginTop: "28px" }}>
+          <div style={{ marginTop: "28px", minWidth: 0 }}>
             <h2
               style={{
                 fontSize: "11px",
@@ -116,18 +123,26 @@ export default function Modern({ data }: ModernProps) {
                 display: "flex",
                 flexWrap: "wrap",
                 gap: "6px",
+                width: "100%",
+                boxSizing: "border-box",
               }}
             >
               {data.skills.map((skill) => (
                 <span
                   key={skill}
                   style={{
-                    padding: "3px 10px",
+                    display: "inline-block",
+                    maxWidth: "100%",
+                    padding: "3px 8px",
                     backgroundColor: "rgba(96, 165, 250, 0.15)",
                     borderRadius: "4px",
                     fontSize: "11px",
                     color: "#93c5fd",
                     border: "1px solid rgba(96, 165, 250, 0.25)",
+                    wordBreak: "break-word",
+                    overflowWrap: "anywhere",
+                    whiteSpace: "normal",
+                    boxSizing: "border-box",
                   }}
                 >
                   {skill}
@@ -228,11 +243,11 @@ export default function Modern({ data }: ModernProps) {
       </aside>
 
       {/* MAIN CONTENT */}
-      <main style={{ padding: "36px 32px" }}>
+      <main style={{ padding: "36px 32px", minWidth: 0, boxSizing: "border-box", overflowWrap: "break-word" }}>
 
         {/* Summary */}
         {data.summary && (
-          <section>
+          <section style={{ minWidth: 0 }}>
             <h2
               style={{
                 fontSize: "11px",
@@ -247,7 +262,7 @@ export default function Modern({ data }: ModernProps) {
             >
               Profile
             </h2>
-            <p style={{ whiteSpace: "pre-line", color: "#475569", lineHeight: "1.7", fontSize: "13px" }}>
+            <p style={{ whiteSpace: "pre-line", color: "#475569", lineHeight: "1.7", fontSize: "13px", wordBreak: "break-word", overflowWrap: "anywhere" }}>
               {data.summary}
             </p>
           </section>
@@ -255,7 +270,7 @@ export default function Modern({ data }: ModernProps) {
 
         {/* Experience */}
         {data.experiences.length > 0 && (
-          <section style={{ marginTop: "24px" }}>
+          <section style={{ marginTop: "24px", minWidth: 0 }}>
             <h2
               style={{
                 fontSize: "11px",
@@ -287,6 +302,7 @@ export default function Modern({ data }: ModernProps) {
                     style={{
                       borderLeft: "3px solid #3b82f6",
                       paddingLeft: "14px",
+                      minWidth: 0,
                     }}
                   >
                     <div
@@ -295,21 +311,22 @@ export default function Modern({ data }: ModernProps) {
                         justifyContent: "space-between",
                         alignItems: "flex-start",
                         gap: "12px",
+                        flexWrap: "wrap",
                       }}
                     >
-                      <div>
-                        <h3 style={{ fontWeight: 700, fontSize: "14px", margin: 0 }}>
+                      <div style={{ minWidth: 0 }}>
+                        <h3 style={{ fontWeight: 700, fontSize: "14px", margin: 0, wordBreak: "break-word" }}>
                           {experience.role || "Role"}
                         </h3>
                         {experience.company && (
-                          <p style={{ fontWeight: 500, color: "#3b82f6", margin: "2px 0 0", fontSize: "13px" }}>
+                          <p style={{ fontWeight: 500, color: "#3b82f6", margin: "2px 0 0", fontSize: "13px", wordBreak: "break-word" }}>
                             {experience.company}
                             {experience.location ? ` · ${experience.location}` : ""}
                           </p>
                         )}
                       </div>
                       {dateRange && (
-                        <p style={{ whiteSpace: "nowrap", fontSize: "11px", color: "#94a3b8" }}>
+                        <p style={{ whiteSpace: "nowrap", fontSize: "11px", color: "#94a3b8", flexShrink: 0, margin: 0 }}>
                           {dateRange}
                         </p>
                       )}
@@ -321,6 +338,8 @@ export default function Modern({ data }: ModernProps) {
                           whiteSpace: "pre-line",
                           color: "#475569",
                           lineHeight: "1.7",
+                          wordBreak: "break-word",
+                          overflowWrap: "anywhere",
                         }}
                       >
                         {experience.description}
@@ -335,7 +354,7 @@ export default function Modern({ data }: ModernProps) {
 
         {/* Projects */}
         {data.projects.length > 0 && (
-          <section style={{ marginTop: "24px" }}>
+          <section style={{ marginTop: "24px", minWidth: 0 }}>
             <h2
               style={{
                 fontSize: "11px",
@@ -352,12 +371,12 @@ export default function Modern({ data }: ModernProps) {
             </h2>
             <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
               {data.projects.map((project) => (
-                <div key={project.id}>
-                  <h3 style={{ fontWeight: 700, fontSize: "14px", margin: 0 }}>
+                <div key={project.id} style={{ minWidth: 0 }}>
+                  <h3 style={{ fontWeight: 700, fontSize: "14px", margin: 0, wordBreak: "break-word" }}>
                     {project.name || "Project Name"}
                   </h3>
                   {project.technologies && (
-                    <p style={{ fontSize: "12px", fontWeight: 500, color: "#3b82f6", margin: "2px 0 0" }}>
+                    <p style={{ fontSize: "12px", fontWeight: 500, color: "#3b82f6", margin: "2px 0 0", wordBreak: "break-word" }}>
                       {project.technologies}
                     </p>
                   )}
@@ -368,13 +387,15 @@ export default function Modern({ data }: ModernProps) {
                         whiteSpace: "pre-line",
                         color: "#475569",
                         lineHeight: "1.7",
+                        wordBreak: "break-word",
+                        overflowWrap: "anywhere",
                       }}
                     >
                       {project.description}
                     </p>
                   )}
                   {project.link && (
-                    <p style={{ fontSize: "11px", color: "#94a3b8", wordBreak: "break-all", marginTop: "2px" }}>
+                    <p style={{ fontSize: "11px", color: "#94a3b8", wordBreak: "break-all", overflowWrap: "anywhere", marginTop: "2px" }}>
                       {project.link}
                     </p>
                   )}
