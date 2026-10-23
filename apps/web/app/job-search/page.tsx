@@ -247,7 +247,7 @@ function getCompanyCareerPortalUrl(job: Job): string {
 
   // Exact official company applicant tracking systems & career portal job listings:
   if (compLower.includes("tata consultancy") || compLower === "tcs") {
-    return `https://ibegin.tcs.com/iBegin/jobs/search?keyword=${qTitle}&location=${qLoc}`;
+    return `https://ibegin.tcsapps.com/iBegin/jobs/search?keyword=${qTitle}&location=${qLoc}`;
   }
   if (compLower.includes("infosys")) {
     return `https://career.infosys.com/joblist?keyword=${qTitle}`;
@@ -325,7 +325,7 @@ function getCompanyCareerPortalUrl(job: Job): string {
     return `https://www.airtel.in/careers/job-search?keyword=${qTitle}`;
   }
   if (compLower.includes("deloitte")) {
-    return `https://jobsindia.deloitte.com/search/?q=${qTitle}`;
+    return "https://usijobs.deloitte.com/";
   }
   if (compLower.includes("hdfc bank") || compLower.includes("hdfc")) {
     return `https://www.hdfcbank.com/personal/about-us/careers?keyword=${qTitle}`;
@@ -400,7 +400,7 @@ function getApplyUrl(job: Job): string {
     job.applyUrl.startsWith("http") &&
     !job.applyUrl.includes("linkedin.com") &&
     (
-      job.applyUrl.includes("ibegin.tcs.com") ||
+      job.applyUrl.includes("ibegin.tcsapps.com") ||
       job.applyUrl.includes("career.infosys.com") ||
       job.applyUrl.includes("greenhouse.io") ||
       job.applyUrl.includes("lever.co") ||
@@ -411,6 +411,7 @@ function getApplyUrl(job: Job): string {
       job.applyUrl.includes("careers.microsoft.com") ||
       job.applyUrl.includes("careers.wipro.com") ||
       job.applyUrl.includes("deloitte.com") ||
+      job.applyUrl.includes("usijobs.deloitte.com") ||
       job.applyUrl.includes("walmart.com") ||
       job.applyUrl.includes("accenture.com") ||
       job.applyUrl.includes("hcltech.com") ||
@@ -429,7 +430,7 @@ function getApplyUrl(job: Job): string {
 // ─── Fallback sample jobs — 60+ roles across all categories ──────────────────
 const SAMPLE_INDIA_JOBS: Job[] = [
   // ── Software Engineering ──────────────────────────────────────────────────
-  { id:"s1",  title:"Senior Software Engineer – Full Stack", company:"Tata Consultancy Services", companyLogo:null, location:"Bengaluru, Karnataka", isRemote:false, type:"Full-Time",   salary:"₹18L – ₹28L / year",          description:"Build enterprise-grade web platforms using React, Node.js and AWS for global Fortune 500 clients.",                                                           tags:["React","Node.js","AWS","TypeScript","PostgreSQL"],                    applyUrl:"https://ibegin.tcs.com/iBegin/jobs/search?keyword=Senior%20Software%20Engineer%20Full%20Stack&location=Bengaluru", postedAt:new Date(Date.now()-1*86400000).toISOString(), source:"Resumo" },
+  { id:"s1",  title:"Senior Software Engineer – Full Stack", company:"Tata Consultancy Services", companyLogo:null, location:"Bengaluru, Karnataka", isRemote:false, type:"Full-Time",   salary:"₹18L – ₹28L / year",          description:"Build enterprise-grade web platforms using React, Node.js and AWS for global Fortune 500 clients.",                                                           tags:["React","Node.js","AWS","TypeScript","PostgreSQL"],                    applyUrl:"https://ibegin.tcsapps.com/iBegin/jobs/search?keyword=Senior%20Software%20Engineer%20Full%20Stack&location=Bengaluru", postedAt:new Date(Date.now()-1*86400000).toISOString(), source:"Resumo" },
   { id:"s2",  title:"Backend Developer (Python / Django)", company:"Infosys", companyLogo:null, location:"Hyderabad, Telangana",    isRemote:false, type:"Full-Time",   salary:"₹14L – ₹22L / year",          description:"Design scalable REST APIs for Infosys BPM clients using Django REST Framework and Docker.",                                                               tags:["Python","Django","REST API","Docker","MySQL"],                        applyUrl:"https://career.infosys.com/joblist?keyword=Backend%20Developer%20Python%20Django", postedAt:new Date(Date.now()-2*86400000).toISOString(), source:"Resumo" },
   { id:"s3",  title:"Frontend Engineer – React / Next.js", company:"Razorpay", companyLogo:null, location:"Bengaluru, Karnataka",    isRemote:true,  type:"Remote",      salary:"₹22L – ₹38L / year",          description:"Build high-performance payment UIs used by millions of merchants daily using React and Next.js.",                                                       tags:["React","Next.js","TypeScript","Tailwind CSS","GraphQL"],              applyUrl:"https://job-boards.greenhouse.io/razorpay?query=Frontend%20Engineer%20React%20Next.js", postedAt:new Date(Date.now()-1*86400000).toISOString(), source:"Resumo" },
   { id:"s4",  title:"Java Backend Engineer", company:"HCL Technologies", companyLogo:null, location:"Noida, Uttar Pradesh",    isRemote:false, type:"Full-Time",   salary:"₹12L – ₹20L / year",          description:"Develop microservices using Spring Boot and Kafka for banking and insurance enterprise clients.",                                                          tags:["Java","Spring Boot","Kafka","Microservices","Oracle DB"],             applyUrl:"https://careers.hcltech.com/search?keyword=Java%20Backend%20Engineer", postedAt:new Date(Date.now()-3*86400000).toISOString(), source:"Resumo" },
@@ -465,7 +466,7 @@ const SAMPLE_INDIA_JOBS: Job[] = [
   { id:"i3",  title:"Network Engineer", company:"Airtel", companyLogo:null, location:"Delhi, Delhi",             isRemote:false, type:"Full-Time",   salary:"₹10L – ₹18L / year",          description:"Design, deploy and maintain Airtel's 5G and fibre network infrastructure across India.",                                                                 tags:["Networking","CCNA","BGP","MPLS","Network Security"],                  applyUrl:"https://www.airtel.in/careers/job-search?keyword=Network%20Engineer", postedAt:new Date(Date.now()-3*86400000).toISOString(), source:"Resumo" },
 
   // ── Cybersecurity ─────────────────────────────────────────────────────────
-  { id:"c1",  title:"Cybersecurity Analyst", company:"Deloitte India", companyLogo:null, location:"Mumbai, Maharashtra",      isRemote:false, type:"Full-Time",   salary:"₹12L – ₹22L / year",          description:"Monitor, detect and respond to cyber threats for Deloitte's enterprise clients. SIEM and SOC experience required.",                                       tags:["SIEM","SOC","Incident Response","OWASP","Python"],                    applyUrl:"https://jobsindia.deloitte.com/search/?q=Cybersecurity%20Analyst", postedAt:new Date(Date.now()-2*86400000).toISOString(), source:"Resumo" },
+  { id:"c1",  title:"Cybersecurity Analyst", company:"Deloitte India", companyLogo:null, location:"Mumbai, Maharashtra",      isRemote:false, type:"Full-Time",   salary:"₹12L – ₹22L / year",          description:"Monitor, detect and respond to cyber threats for Deloitte's enterprise clients. SIEM and SOC experience required.",                                       tags:["SIEM","SOC","Incident Response","OWASP","Python"],                    applyUrl:"https://usijobs.deloitte.com/", postedAt:new Date(Date.now()-2*86400000).toISOString(), source:"Resumo" },
   { id:"c2",  title:"Penetration Tester", company:"Razorpay", companyLogo:null, location:"Bengaluru, Karnataka",    isRemote:false, type:"Full-Time",   salary:"₹18L – ₹32L / year",          description:"Conduct web, mobile and API penetration testing for Razorpay's fintech infrastructure. CEH / OSCP preferred.",                                          tags:["Penetration Testing","Burp Suite","OWASP","Linux","Python"],          applyUrl:"https://job-boards.greenhouse.io/razorpay?query=Penetration%20Tester", postedAt:new Date(Date.now()-1*86400000).toISOString(), source:"Resumo" },
   { id:"c3",  title:"Information Security Engineer", company:"HDFC Bank", companyLogo:null, location:"Mumbai, Maharashtra",      isRemote:false, type:"Full-Time",   salary:"₹16L – ₹28L / year",          description:"Implement information security policies, vulnerability management and compliance frameworks.",                                                             tags:["ISO 27001","VAPT","Firewall","DLP","Risk Management"],                applyUrl:"https://www.hdfcbank.com/personal/about-us/careers?keyword=Information%20Security%20Engineer", postedAt:new Date(Date.now()-3*86400000).toISOString(), source:"Resumo" },
 
