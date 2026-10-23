@@ -237,200 +237,289 @@ function cleanJobSearchText(text: string): string {
     .trim();
 }
 
-function isGenericCareerPage(url?: string | null): boolean {
-  if (!url || url === "#" || url === "/") return true;
-  const clean = url.trim().toLowerCase().replace(/\/+$/, "");
+function getCompanyCareerPortalUrl(job: Job): string {
+  const comp = (job.company || "").trim();
+  const compLower = comp.toLowerCase();
+  const cleanTitle = cleanJobSearchText(job.title);
+  const loc = (job.location || "India").split(",")[0].trim();
+  const qTitle = encodeURIComponent(cleanTitle);
+  const qLoc = encodeURIComponent(loc);
 
-  // URLs that are already specific job IDs / postings / query searches
-  if (
-    clean.includes("/jobs/view/") ||
-    clean.includes("/viewjob") ||
-    clean.includes("jobid=") ||
-    clean.includes("job_id=") ||
-    clean.includes("gh_jid=") ||
-    clean.includes("requisition_id=") ||
-    clean.includes("jk=") ||
-    clean.includes("?keyword=") ||
-    clean.includes("?q=") ||
-    clean.includes("?base_query=") ||
-    clean.includes("job-listings-") ||
-    clean.includes("/jobs/results/?q=")
-  ) {
-    return false;
+  // Exact official company applicant tracking systems & career portal job listings:
+  if (compLower.includes("tata consultancy") || compLower === "tcs") {
+    return `https://ibegin.tcs.com/iBegin/jobs/search?keyword=${qTitle}&location=${qLoc}`;
+  }
+  if (compLower.includes("infosys")) {
+    return `https://career.infosys.com/joblist?keyword=${qTitle}`;
+  }
+  if (compLower.includes("razorpay")) {
+    return `https://job-boards.greenhouse.io/razorpay?query=${qTitle}`;
+  }
+  if (compLower.includes("hcl")) {
+    return `https://careers.hcltech.com/search?keyword=${qTitle}`;
+  }
+  if (compLower.includes("paytm")) {
+    return `https://jobs.lever.co/paytm?query=${qTitle}`;
+  }
+  if (compLower.includes("meesho")) {
+    return `https://meesho.io/jobs?search=${qTitle}`;
+  }
+  if (compLower.includes("freshworks")) {
+    return `https://jobs.lever.co/freshworks?query=${qTitle}`;
+  }
+  if (compLower.includes("zomato")) {
+    return `https://www.zomato.com/careers?search=${qTitle}#openings`;
+  }
+  if (compLower.includes("ola") || compLower.includes("ola electric")) {
+    return `https://olaelectric.com/careers?search=${qTitle}`;
+  }
+  if (compLower.includes("nykaa")) {
+    return `https://www.nykaa.com/careers?search=${qTitle}`;
+  }
+  if (compLower.includes("wipro")) {
+    return `https://careers.wipro.com/careers-home/jobs?keywords=${qTitle}`;
+  }
+  if (compLower.includes("swiggy")) {
+    return `https://careers.swiggy.com/?search=${qTitle}#openings`;
+  }
+  if (compLower.includes("makemytrip")) {
+    return `https://careers.makemytrip.com/?search=${qTitle}`;
+  }
+  if (compLower.includes("walmart")) {
+    return `https://careers.walmart.com/results?q=${qTitle}&location=India`;
+  }
+  if (compLower.includes("myntra")) {
+    return `https://careers.myntra.com/?search=${qTitle}`;
+  }
+  if (compLower.includes("zepto")) {
+    return `https://www.zepto.co/careers?search=${qTitle}`;
+  }
+  if (compLower.includes("groww")) {
+    return `https://groww.in/careers?search=${qTitle}`;
+  }
+  if (compLower.includes("cred")) {
+    return `https://careers.cred.club/jobs?search=${qTitle}`;
+  }
+  if (compLower.includes("google")) {
+    return `https://www.google.com/about/careers/applications/jobs/results/?q=${qTitle}&location=India`;
+  }
+  if (compLower.includes("accenture")) {
+    return `https://www.accenture.com/in-en/careers/jobsearch?jk=${qTitle}`;
+  }
+  if (compLower.includes("browserstack")) {
+    return `https://www.browserstack.com/careers?search=${qTitle}#open-roles`;
+  }
+  if (compLower.includes("sarvam")) {
+    return `https://www.sarvam.ai/careers?search=${qTitle}`;
+  }
+  if (compLower.includes("nvidia")) {
+    return `https://nvidia.wd5.myworkdayjobs.com/NVIDIAExternalCareerSite?q=${qTitle}`;
+  }
+  if (compLower.includes("flipkart")) {
+    return `https://www.flipkartcareers.com/#!/searchjobs?q=${qTitle}`;
+  }
+  if (compLower.includes("microsoft")) {
+    return `https://careers.microsoft.com/v2/global/en/home.html#search?q=${qTitle}&l=en_us`;
+  }
+  if (compLower.includes("airtel")) {
+    return `https://www.airtel.in/careers/job-search?keyword=${qTitle}`;
+  }
+  if (compLower.includes("deloitte")) {
+    return `https://jobsindia.deloitte.com/search/?q=${qTitle}`;
+  }
+  if (compLower.includes("hdfc bank") || compLower.includes("hdfc")) {
+    return `https://www.hdfcbank.com/personal/about-us/careers?keyword=${qTitle}`;
+  }
+  if (compLower.includes("juspay")) {
+    return `https://juspay.in/careers?role=${qTitle}`;
+  }
+  if (compLower.includes("inmobi")) {
+    return `https://www.inmobi.com/company/careers?query=${qTitle}`;
+  }
+  if (compLower.includes("phonepe")) {
+    return `https://www.phonepe.com/careers/?search=${qTitle}`;
+  }
+  if (compLower.includes("navi")) {
+    return `https://navi.com/careers?search=${qTitle}`;
+  }
+  if (compLower.includes("sharechat")) {
+    return `https://sharechat.com/careers?search=${qTitle}`;
+  }
+  if (compLower.includes("krutrim")) {
+    return `https://www.olakrutrim.com/careers?search=${qTitle}`;
+  }
+  if (compLower.includes("amazon")) {
+    return `https://www.amazon.jobs/en/search?base_query=${qTitle}&loc_query=India`;
+  }
+  if (compLower.includes("ixigo")) {
+    return `https://www.ixigo.com/careers?search=${qTitle}`;
+  }
+  if (compLower.includes("byju")) {
+    return `https://byjus.com/careers/?role=${qTitle}`;
+  }
+  if (compLower.includes("zerodha")) {
+    return `https://zerodha.com/careers/?role=${qTitle}`;
+  }
+  if (compLower.includes("icici")) {
+    return `https://www.icicicareers.com/job-search?keyword=${qTitle}`;
+  }
+  if (compLower.includes("urban company")) {
+    return `https://careers.urbancompany.com/?search=${qTitle}`;
+  }
+  if (compLower.includes("info edge") || compLower.includes("naukri")) {
+    return `https://www.infoedge.in/careers.html?role=${qTitle}`;
+  }
+  if (compLower.includes("zoho")) {
+    return `https://www.zoho.com/careers/jobdetails/?role=${qTitle}`;
+  }
+  if (compLower.includes("delhivery")) {
+    return `https://www.delhivery.com/careers/?search=${qTitle}`;
+  }
+  if (compLower.includes("reliance")) {
+    return `https://www.relianceretail.com/careers.html?keyword=${qTitle}`;
+  }
+  if (compLower.includes("leadsquared")) {
+    return `https://www.leadsquared.com/careers/?role=${qTitle}`;
+  }
+  if (compLower.includes("upgrad")) {
+    return `https://www.upgrad.com/careers/?search=${qTitle}`;
+  }
+  if (compLower.includes("scaler")) {
+    return `https://www.scaler.com/careers/?search=${qTitle}`;
   }
 
-  // Generic careers homepages that do not link to a specific job ID
-  const genericDomains = [
-    "tcs.com/careers",
-    "career.infosys.com",
-    "razorpay.com/jobs",
-    "hcltech.com/careers",
-    "paytm.com/careers",
-    "meesho.io/jobs",
-    "freshworks.com/company/careers",
-    "zomato.com/careers",
-    "olaelectric.com/careers",
-    "nykaa.com/careers",
-    "wipro.com",
-    "swiggy.com",
-    "makemytrip.com",
-    "walmart.com",
-    "myntra.com",
-    "zepto.co/careers",
-    "groww.in/careers",
-    "cred.club",
-    "flipkartcareers.com",
-    "airtel.in/careers",
-    "deloitte-india.html",
-    "hdfcbank.com",
-    "juspay.in/careers",
-    "inmobi.com",
-    "phonepe.com/careers",
-    "navi.com/careers",
-    "sharechat.com/careers",
-    "olakrutrim.com",
-    "amazon.jobs/en/locations/india",
-    "ixigo.com/careers",
-    "byjus.com/careers",
-    "zerodha.com/careers",
-    "icicicareers.com",
-    "urbancompany.com",
-    "infoedge.in",
-    "zoho.com/careers",
-    "delhivery.com/careers",
-    "relianceretail.com",
-    "leadsquared.com/careers",
-    "upgrad.com/careers",
-    "scaler.com/careers"
-  ];
-
-  return genericDomains.some(d => clean.includes(d)) || clean.endsWith("/careers") || clean.endsWith("/jobs");
+  // Fallback to company careers with query parameter
+  const baseCareer = COMPANY_CAREERS[compLower] || `https://www.${compLower.replace(/[^a-z0-9]/g, "")}.com/careers`;
+  return `${baseCareer.replace(/\/+$/, "")}?keyword=${qTitle}`;
 }
 
 function getApplyUrl(job: Job): string {
-  // 1. If job has a specific, non-generic direct apply URL with a job ID / path
-  if (job.applyUrl && job.applyUrl.startsWith("http") && !isGenericCareerPage(job.applyUrl)) {
+  // If the job already has a specific direct job ID on an official company career portal / ATS:
+  if (
+    job.applyUrl &&
+    job.applyUrl.startsWith("http") &&
+    !job.applyUrl.includes("linkedin.com") &&
+    (
+      job.applyUrl.includes("ibegin.tcs.com") ||
+      job.applyUrl.includes("career.infosys.com") ||
+      job.applyUrl.includes("greenhouse.io") ||
+      job.applyUrl.includes("lever.co") ||
+      job.applyUrl.includes("myworkdayjobs.com") ||
+      job.applyUrl.includes("amazon.jobs") ||
+      job.applyUrl.includes("careers.google.com") ||
+      job.applyUrl.includes("google.com/about/careers") ||
+      job.applyUrl.includes("careers.microsoft.com") ||
+      job.applyUrl.includes("careers.wipro.com") ||
+      job.applyUrl.includes("deloitte.com") ||
+      job.applyUrl.includes("walmart.com") ||
+      job.applyUrl.includes("accenture.com") ||
+      job.applyUrl.includes("hcltech.com") ||
+      job.applyUrl.includes("keyword=") ||
+      job.applyUrl.includes("query=") ||
+      job.applyUrl.includes("jobId=") ||
+      job.applyUrl.includes("jobReference=")
+    )
+  ) {
     return job.applyUrl;
   }
 
-  const cleanTitle = cleanJobSearchText(job.title);
-  const cleanComp = cleanJobSearchText(job.company);
-  const loc = (job.location || "India").split(",")[0].trim();
-  const compLower = (job.company || "").toLowerCase().trim();
-
-  // 2. Company-specific direct job search pages where keyword lands directly on the job posting
-  if (compLower.includes("google")) {
-    return `https://www.google.com/about/careers/applications/jobs/results/?q=${encodeURIComponent(cleanTitle)}&location=India`;
-  }
-  if (compLower.includes("amazon")) {
-    return `https://www.amazon.jobs/en/search?base_query=${encodeURIComponent(cleanTitle)}&loc_query=India`;
-  }
-  if (compLower.includes("infosys")) {
-    return `https://career.infosys.com/joblist?keyword=${encodeURIComponent(cleanTitle)}`;
-  }
-  if (compLower.includes("tata consultancy") || compLower === "tcs") {
-    return `https://www.linkedin.com/jobs/search/?keywords=${encodeURIComponent(`Tata Consultancy Services ${cleanTitle}`)}&location=${encodeURIComponent(job.location || "Bengaluru")}`;
-  }
-
-  // 3. Universal direct job posting search on LinkedIn:
-  // Immediately presents the exact job posting with job ID, description, and direct Apply / Easy Apply button.
-  return `https://www.linkedin.com/jobs/search/?keywords=${encodeURIComponent(`${cleanComp} ${cleanTitle}`)}&location=${encodeURIComponent(loc || "India")}`;
+  return getCompanyCareerPortalUrl(job);
 }
 
 // ─── Fallback sample jobs — 60+ roles across all categories ──────────────────
 const SAMPLE_INDIA_JOBS: Job[] = [
   // ── Software Engineering ──────────────────────────────────────────────────
-  { id:"s1",  title:"Senior Software Engineer – Full Stack", company:"Tata Consultancy Services", companyLogo:null, location:"Bengaluru, Karnataka", isRemote:false, type:"Full-Time",   salary:"₹18L – ₹28L / year",          description:"Build enterprise-grade web platforms using React, Node.js and AWS for global Fortune 500 clients.",                                                           tags:["React","Node.js","AWS","TypeScript","PostgreSQL"],                    applyUrl:"https://www.linkedin.com/jobs/search/?keywords=Tata%20Consultancy%20Services%20Senior%20Software%20Engineer%20Full%20Stack&location=Bengaluru", postedAt:new Date(Date.now()-1*86400000).toISOString(), source:"Resumo" },
+  { id:"s1",  title:"Senior Software Engineer – Full Stack", company:"Tata Consultancy Services", companyLogo:null, location:"Bengaluru, Karnataka", isRemote:false, type:"Full-Time",   salary:"₹18L – ₹28L / year",          description:"Build enterprise-grade web platforms using React, Node.js and AWS for global Fortune 500 clients.",                                                           tags:["React","Node.js","AWS","TypeScript","PostgreSQL"],                    applyUrl:"https://ibegin.tcs.com/iBegin/jobs/search?keyword=Senior%20Software%20Engineer%20Full%20Stack&location=Bengaluru", postedAt:new Date(Date.now()-1*86400000).toISOString(), source:"Resumo" },
   { id:"s2",  title:"Backend Developer (Python / Django)", company:"Infosys", companyLogo:null, location:"Hyderabad, Telangana",    isRemote:false, type:"Full-Time",   salary:"₹14L – ₹22L / year",          description:"Design scalable REST APIs for Infosys BPM clients using Django REST Framework and Docker.",                                                               tags:["Python","Django","REST API","Docker","MySQL"],                        applyUrl:"https://career.infosys.com/joblist?keyword=Backend%20Developer%20Python%20Django", postedAt:new Date(Date.now()-2*86400000).toISOString(), source:"Resumo" },
-  { id:"s3",  title:"Frontend Engineer – React / Next.js", company:"Razorpay", companyLogo:null, location:"Bengaluru, Karnataka",    isRemote:true,  type:"Remote",      salary:"₹22L – ₹38L / year",          description:"Build high-performance payment UIs used by millions of merchants daily using React and Next.js.",                                                       tags:["React","Next.js","TypeScript","Tailwind CSS","GraphQL"],              applyUrl:"https://www.linkedin.com/jobs/search/?keywords=Razorpay%20Frontend%20Engineer%20React%20Next.js&location=Bengaluru", postedAt:new Date(Date.now()-1*86400000).toISOString(), source:"Resumo" },
-  { id:"s4",  title:"Java Backend Engineer", company:"HCL Technologies", companyLogo:null, location:"Noida, Uttar Pradesh",    isRemote:false, type:"Full-Time",   salary:"₹12L – ₹20L / year",          description:"Develop microservices using Spring Boot and Kafka for banking and insurance enterprise clients.",                                                          tags:["Java","Spring Boot","Kafka","Microservices","Oracle DB"],             applyUrl:"https://www.linkedin.com/jobs/search/?keywords=HCL%20Technologies%20Java%20Backend%20Engineer&location=Noida", postedAt:new Date(Date.now()-3*86400000).toISOString(), source:"Resumo" },
-  { id:"s5",  title:"Android Developer (Kotlin)", company:"Paytm", companyLogo:null, location:"Noida, Uttar Pradesh",    isRemote:false, type:"Full-Time",   salary:"₹16L – ₹26L / year",          description:"Maintain Paytm's Android super-app used by 350M+ users. Expertise in Kotlin and Jetpack Compose required.",                                              tags:["Kotlin","Jetpack Compose","MVVM","Retrofit","Room"],                  applyUrl:"https://www.linkedin.com/jobs/search/?keywords=Paytm%20Android%20Developer%20Kotlin&location=Noida", postedAt:new Date(Date.now()-5*86400000).toISOString(), source:"Resumo" },
-  { id:"s6",  title:"iOS Developer (Swift)", company:"Meesho", companyLogo:null, location:"Bengaluru, Karnataka",    isRemote:false, type:"Full-Time",   salary:"₹18L – ₹30L / year",          description:"Build Meesho's social commerce iOS app reaching tier-2 and tier-3 India. 3+ years Swift / SwiftUI required.",                                           tags:["Swift","SwiftUI","Combine","Core Data","Xcode"],                      applyUrl:"https://www.linkedin.com/jobs/search/?keywords=Meesho%20iOS%20Developer%20Swift&location=Bengaluru", postedAt:new Date(Date.now()-1*86400000).toISOString(), source:"Resumo" },
-  { id:"s7",  title:"Full Stack Developer (Contract)", company:"Freshworks", companyLogo:null, location:"Chennai, Tamil Nadu",      isRemote:true,  type:"Contract",    salary:"₹3,500 – ₹5,500 / day",       description:"6-month contract to build Freshdesk CRM modules using React and Ruby on Rails. Immediate joiners preferred.",                                            tags:["React","Ruby on Rails","PostgreSQL","Redis","AWS"],                   applyUrl:"https://www.linkedin.com/jobs/search/?keywords=Freshworks%20Full%20Stack%20Developer%20Contract&location=Chennai", postedAt:new Date(Date.now()-2*86400000).toISOString(), source:"Resumo" },
-  { id:"s8",  title:"Software Engineering Intern", company:"Zomato", companyLogo:null, location:"Gurugram, Haryana",        isRemote:false, type:"Internship",  salary:"₹50,000 – ₹70,000 / month",   description:"6-month internship on Zomato's order-management and logistics platform. B.Tech / M.Tech final-year students.",                                          tags:["Java","Spring Boot","React","MySQL","Redis"],                         applyUrl:"https://www.linkedin.com/jobs/search/?keywords=Zomato%20Software%20Engineering%20Intern&location=Gurugram", postedAt:new Date(Date.now()-1*86400000).toISOString(), source:"Resumo" },
-  { id:"s9",  title:"Go Developer", company:"Ola", companyLogo:null, location:"Bengaluru, Karnataka",    isRemote:false, type:"Full-Time",   salary:"₹20L – ₹35L / year",          description:"Design high-throughput ride-matching and dispatch services in Go for Ola's mobility platform.",                                                           tags:["Go","gRPC","Kubernetes","Cassandra","Redis"],                         applyUrl:"https://www.linkedin.com/jobs/search/?keywords=Ola%20Go%20Developer&location=Bengaluru", postedAt:new Date(Date.now()-2*86400000).toISOString(), source:"Resumo" },
-  { id:"s10", title:"PHP Laravel Developer", company:"Nykaa", companyLogo:null, location:"Mumbai, Maharashtra",      isRemote:false, type:"Full-Time",   salary:"₹10L – ₹18L / year",          description:"Build and maintain Nykaa's e-commerce backend using PHP Laravel, MySQL, and Elasticsearch.",                                                              tags:["PHP","Laravel","MySQL","Elasticsearch","Redis"],                      applyUrl:"https://www.linkedin.com/jobs/search/?keywords=Nykaa%20PHP%20Laravel%20Developer&location=Mumbai", postedAt:new Date(Date.now()-4*86400000).toISOString(), source:"Resumo" },
-  { id:"s11", title:"Cloud Architect – AWS", company:"Wipro", companyLogo:null, location:"Chennai, Tamil Nadu",      isRemote:false, type:"Full-Time",   salary:"₹30L – ₹50L / year",          description:"Lead cloud migration for global enterprise clients. AWS Solutions Architect Professional certification required.",                                         tags:["AWS","Terraform","Microservices","Security","Cost Optimisation"],     applyUrl:"https://www.linkedin.com/jobs/search/?keywords=Wipro%20Cloud%20Architect%20AWS&location=Chennai", postedAt:new Date(Date.now()-6*86400000).toISOString(), source:"Resumo" },
+  { id:"s3",  title:"Frontend Engineer – React / Next.js", company:"Razorpay", companyLogo:null, location:"Bengaluru, Karnataka",    isRemote:true,  type:"Remote",      salary:"₹22L – ₹38L / year",          description:"Build high-performance payment UIs used by millions of merchants daily using React and Next.js.",                                                       tags:["React","Next.js","TypeScript","Tailwind CSS","GraphQL"],              applyUrl:"https://job-boards.greenhouse.io/razorpay?query=Frontend%20Engineer%20React%20Next.js", postedAt:new Date(Date.now()-1*86400000).toISOString(), source:"Resumo" },
+  { id:"s4",  title:"Java Backend Engineer", company:"HCL Technologies", companyLogo:null, location:"Noida, Uttar Pradesh",    isRemote:false, type:"Full-Time",   salary:"₹12L – ₹20L / year",          description:"Develop microservices using Spring Boot and Kafka for banking and insurance enterprise clients.",                                                          tags:["Java","Spring Boot","Kafka","Microservices","Oracle DB"],             applyUrl:"https://careers.hcltech.com/search?keyword=Java%20Backend%20Engineer", postedAt:new Date(Date.now()-3*86400000).toISOString(), source:"Resumo" },
+  { id:"s5",  title:"Android Developer (Kotlin)", company:"Paytm", companyLogo:null, location:"Noida, Uttar Pradesh",    isRemote:false, type:"Full-Time",   salary:"₹16L – ₹26L / year",          description:"Maintain Paytm's Android super-app used by 350M+ users. Expertise in Kotlin and Jetpack Compose required.",                                              tags:["Kotlin","Jetpack Compose","MVVM","Retrofit","Room"],                  applyUrl:"https://jobs.lever.co/paytm?query=Android%20Developer%20Kotlin", postedAt:new Date(Date.now()-5*86400000).toISOString(), source:"Resumo" },
+  { id:"s6",  title:"iOS Developer (Swift)", company:"Meesho", companyLogo:null, location:"Bengaluru, Karnataka",    isRemote:false, type:"Full-Time",   salary:"₹18L – ₹30L / year",          description:"Build Meesho's social commerce iOS app reaching tier-2 and tier-3 India. 3+ years Swift / SwiftUI required.",                                           tags:["Swift","SwiftUI","Combine","Core Data","Xcode"],                      applyUrl:"https://meesho.io/jobs?search=iOS%20Developer%20Swift", postedAt:new Date(Date.now()-1*86400000).toISOString(), source:"Resumo" },
+  { id:"s7",  title:"Full Stack Developer (Contract)", company:"Freshworks", companyLogo:null, location:"Chennai, Tamil Nadu",      isRemote:true,  type:"Contract",    salary:"₹3,500 – ₹5,500 / day",       description:"6-month contract to build Freshdesk CRM modules using React and Ruby on Rails. Immediate joiners preferred.",                                            tags:["React","Ruby on Rails","PostgreSQL","Redis","AWS"],                   applyUrl:"https://jobs.lever.co/freshworks?query=Full%20Stack%20Developer%20Contract", postedAt:new Date(Date.now()-2*86400000).toISOString(), source:"Resumo" },
+  { id:"s8",  title:"Software Engineering Intern", company:"Zomato", companyLogo:null, location:"Gurugram, Haryana",        isRemote:false, type:"Internship",  salary:"₹50,000 – ₹70,000 / month",   description:"6-month internship on Zomato's order-management and logistics platform. B.Tech / M.Tech final-year students.",                                          tags:["Java","Spring Boot","React","MySQL","Redis"],                         applyUrl:"https://www.zomato.com/careers?search=Software%20Engineering%20Intern#openings", postedAt:new Date(Date.now()-1*86400000).toISOString(), source:"Resumo" },
+  { id:"s9",  title:"Go Developer", company:"Ola", companyLogo:null, location:"Bengaluru, Karnataka",    isRemote:false, type:"Full-Time",   salary:"₹20L – ₹35L / year",          description:"Design high-throughput ride-matching and dispatch services in Go for Ola's mobility platform.",                                                           tags:["Go","gRPC","Kubernetes","Cassandra","Redis"],                         applyUrl:"https://olaelectric.com/careers?search=Go%20Developer", postedAt:new Date(Date.now()-2*86400000).toISOString(), source:"Resumo" },
+  { id:"s10", title:"PHP Laravel Developer", company:"Nykaa", companyLogo:null, location:"Mumbai, Maharashtra",      isRemote:false, type:"Full-Time",   salary:"₹10L – ₹18L / year",          description:"Build and maintain Nykaa's e-commerce backend using PHP Laravel, MySQL, and Elasticsearch.",                                                              tags:["PHP","Laravel","MySQL","Elasticsearch","Redis"],                      applyUrl:"https://www.nykaa.com/careers?search=PHP%20Laravel%20Developer", postedAt:new Date(Date.now()-4*86400000).toISOString(), source:"Resumo" },
+  { id:"s11", title:"Cloud Architect – AWS", company:"Wipro", companyLogo:null, location:"Chennai, Tamil Nadu",      isRemote:false, type:"Full-Time",   salary:"₹30L – ₹50L / year",          description:"Lead cloud migration for global enterprise clients. AWS Solutions Architect Professional certification required.",                                         tags:["AWS","Terraform","Microservices","Security","Cost Optimisation"],     applyUrl:"https://careers.wipro.com/careers-home/jobs?keywords=Cloud%20Architect%20AWS", postedAt:new Date(Date.now()-6*86400000).toISOString(), source:"Resumo" },
 
   // ── Data Science / Analytics ──────────────────────────────────────────────
-  { id:"d1",  title:"Data Scientist – NLP", company:"Swiggy", companyLogo:null, location:"Bengaluru, Karnataka",    isRemote:false, type:"Full-Time",   salary:"₹24L – ₹40L / year",          description:"Build NLP models for restaurant reviews, search ranking and personalisation at Swiggy scale.",                                                            tags:["Python","NLP","BERT","Scikit-learn","SpaCy"],                         applyUrl:"https://www.linkedin.com/jobs/search/?keywords=Swiggy%20Data%20Scientist%20NLP&location=Bengaluru", postedAt:new Date(Date.now()-1*86400000).toISOString(), source:"Resumo" },
-  { id:"d2",  title:"Data Scientist – Computer Vision", company:"MakeMyTrip", companyLogo:null, location:"Gurugram, Haryana",        isRemote:false, type:"Full-Time",   salary:"₹20L – ₹35L / year",          description:"Apply computer vision to hotel image classification, fraud detection, and property verification.",                                                        tags:["Python","OpenCV","PyTorch","CNNs","AWS Rekognition"],                 applyUrl:"https://www.linkedin.com/jobs/search/?keywords=MakeMyTrip%20Data%20Scientist%20Computer%20Vision&location=Gurugram", postedAt:new Date(Date.now()-3*86400000).toISOString(), source:"Resumo" },
-  { id:"d3",  title:"Senior Data Scientist", company:"Walmart Global Tech", companyLogo:null, location:"Bengaluru, Karnataka",    isRemote:false, type:"Full-Time",   salary:"₹30L – ₹50L / year",          description:"Lead demand forecasting, pricing optimisation and assortment planning using advanced ML techniques.",                                                     tags:["Python","R","Machine Learning","SQL","Tableau"],                      applyUrl:"https://www.linkedin.com/jobs/search/?keywords=Walmart%20Global%20Tech%20Senior%20Data%20Scientist&location=Bengaluru", postedAt:new Date(Date.now()-2*86400000).toISOString(), source:"Resumo" },
-  { id:"d4",  title:"Data Science Intern", company:"Ola Electric", companyLogo:null, location:"Bengaluru, Karnataka",    isRemote:false, type:"Internship",  salary:"₹40,000 – ₹60,000 / month",   description:"Build predictive battery health models for Ola's electric vehicle fleet. Final-year students.",                                                          tags:["Python","Pandas","Scikit-learn","Jupyter","SQL"],                     applyUrl:"https://www.linkedin.com/jobs/search/?keywords=Ola%20Electric%20Data%20Science%20Intern&location=Bengaluru", postedAt:new Date(Date.now()-1*86400000).toISOString(), source:"Resumo" },
-  { id:"d5",  title:"Business Analyst – Data", company:"Myntra", companyLogo:null, location:"Bengaluru, Karnataka",    isRemote:false, type:"Full-Time",   salary:"₹12L – ₹20L / year",          description:"Translate fashion business problems into data-driven insights using SQL, Python and Power BI.",                                                          tags:["SQL","Python","Power BI","Excel","Data Storytelling"],                applyUrl:"https://www.linkedin.com/jobs/search/?keywords=Myntra%20Business%20Analyst%20Data&location=Bengaluru", postedAt:new Date(Date.now()-4*86400000).toISOString(), source:"Resumo" },
-  { id:"d6",  title:"Data Analyst", company:"Zepto", companyLogo:null, location:"Mumbai, Maharashtra",      isRemote:false, type:"Full-Time",   salary:"₹10L – ₹16L / year",          description:"Analyse dark-store operations data to improve order fulfilment speed, reduce wastage and grow GMV.",                                                     tags:["SQL","Python","Looker","Excel","A/B Testing"],                        applyUrl:"https://www.linkedin.com/jobs/search/?keywords=Zepto%20Data%20Analyst&location=Mumbai", postedAt:new Date(Date.now()-2*86400000).toISOString(), source:"Resumo" },
-  { id:"d7",  title:"Quantitative Analyst", company:"Groww", companyLogo:null, location:"Bengaluru, Karnataka",    isRemote:false, type:"Full-Time",   salary:"₹22L – ₹40L / year",          description:"Develop quantitative trading strategies and risk models for Groww's mutual fund and stock platforms.",                                                     tags:["Python","R","Statistics","Financial Modelling","SQL"],                applyUrl:"https://www.linkedin.com/jobs/search/?keywords=Groww%20Quantitative%20Analyst&location=Bengaluru", postedAt:new Date(Date.now()-3*86400000).toISOString(), source:"Resumo" },
-  { id:"d8",  title:"Data Engineer", company:"Swiggy", companyLogo:null, location:"Bengaluru, Karnataka",    isRemote:false, type:"Full-Time",   salary:"₹20L – ₹32L / year",          description:"Design petabyte-scale data pipelines for Swiggy's food-delivery and quick-commerce using Spark and Kafka.",                                              tags:["Apache Spark","Kafka","Python","Airflow","BigQuery"],                 applyUrl:"https://www.linkedin.com/jobs/search/?keywords=Swiggy%20Data%20Engineer&location=Bengaluru", postedAt:new Date(Date.now()-3*86400000).toISOString(), source:"Resumo" },
+  { id:"d1",  title:"Data Scientist – NLP", company:"Swiggy", companyLogo:null, location:"Bengaluru, Karnataka",    isRemote:false, type:"Full-Time",   salary:"₹24L – ₹40L / year",          description:"Build NLP models for restaurant reviews, search ranking and personalisation at Swiggy scale.",                                                            tags:["Python","NLP","BERT","Scikit-learn","SpaCy"],                         applyUrl:"https://careers.swiggy.com/?search=Data%20Scientist%20NLP#openings", postedAt:new Date(Date.now()-1*86400000).toISOString(), source:"Resumo" },
+  { id:"d2",  title:"Data Scientist – Computer Vision", company:"MakeMyTrip", companyLogo:null, location:"Gurugram, Haryana",        isRemote:false, type:"Full-Time",   salary:"₹20L – ₹35L / year",          description:"Apply computer vision to hotel image classification, fraud detection, and property verification.",                                                        tags:["Python","OpenCV","PyTorch","CNNs","AWS Rekognition"],                 applyUrl:"https://careers.makemytrip.com/?search=Data%20Scientist%20Computer%20Vision", postedAt:new Date(Date.now()-3*86400000).toISOString(), source:"Resumo" },
+  { id:"d3",  title:"Senior Data Scientist", company:"Walmart Global Tech", companyLogo:null, location:"Bengaluru, Karnataka",    isRemote:false, type:"Full-Time",   salary:"₹30L – ₹50L / year",          description:"Lead demand forecasting, pricing optimisation and assortment planning using advanced ML techniques.",                                                     tags:["Python","R","Machine Learning","SQL","Tableau"],                      applyUrl:"https://careers.walmart.com/results?q=Senior%20Data%20Scientist&location=India", postedAt:new Date(Date.now()-2*86400000).toISOString(), source:"Resumo" },
+  { id:"d4",  title:"Data Science Intern", company:"Ola Electric", companyLogo:null, location:"Bengaluru, Karnataka",    isRemote:false, type:"Internship",  salary:"₹40,000 – ₹60,000 / month",   description:"Build predictive battery health models for Ola's electric vehicle fleet. Final-year students.",                                                          tags:["Python","Pandas","Scikit-learn","Jupyter","SQL"],                     applyUrl:"https://olaelectric.com/careers?search=Data%20Science%20Intern", postedAt:new Date(Date.now()-1*86400000).toISOString(), source:"Resumo" },
+  { id:"d5",  title:"Business Analyst – Data", company:"Myntra", companyLogo:null, location:"Bengaluru, Karnataka",    isRemote:false, type:"Full-Time",   salary:"₹12L – ₹20L / year",          description:"Translate fashion business problems into data-driven insights using SQL, Python and Power BI.",                                                          tags:["SQL","Python","Power BI","Excel","Data Storytelling"],                applyUrl:"https://careers.myntra.com/?search=Business%20Analyst%20Data", postedAt:new Date(Date.now()-4*86400000).toISOString(), source:"Resumo" },
+  { id:"d6",  title:"Data Analyst", company:"Zepto", companyLogo:null, location:"Mumbai, Maharashtra",      isRemote:false, type:"Full-Time",   salary:"₹10L – ₹16L / year",          description:"Analyse dark-store operations data to improve order fulfilment speed, reduce wastage and grow GMV.",                                                     tags:["SQL","Python","Looker","Excel","A/B Testing"],                        applyUrl:"https://www.zepto.co/careers?search=Data%20Analyst", postedAt:new Date(Date.now()-2*86400000).toISOString(), source:"Resumo" },
+  { id:"d7",  title:"Quantitative Analyst", company:"Groww", companyLogo:null, location:"Bengaluru, Karnataka",    isRemote:false, type:"Full-Time",   salary:"₹22L – ₹40L / year",          description:"Develop quantitative trading strategies and risk models for Groww's mutual fund and stock platforms.",                                                     tags:["Python","R","Statistics","Financial Modelling","SQL"],                applyUrl:"https://groww.in/careers?search=Quantitative%20Analyst", postedAt:new Date(Date.now()-3*86400000).toISOString(), source:"Resumo" },
+  { id:"d8",  title:"Data Engineer", company:"Swiggy", companyLogo:null, location:"Bengaluru, Karnataka",    isRemote:false, type:"Full-Time",   salary:"₹20L – ₹32L / year",          description:"Design petabyte-scale data pipelines for Swiggy's food-delivery and quick-commerce using Spark and Kafka.",                                              tags:["Apache Spark","Kafka","Python","Airflow","BigQuery"],                 applyUrl:"https://careers.swiggy.com/?search=Data%20Engineer#openings", postedAt:new Date(Date.now()-3*86400000).toISOString(), source:"Resumo" },
 
   // ── AI / Machine Learning ─────────────────────────────────────────────────
-  { id:"a1",  title:"Machine Learning Engineer", company:"CRED", companyLogo:null, location:"Bengaluru, Karnataka",    isRemote:true,  type:"Hybrid",      salary:"₹28L – ₹45L / year",          description:"Build credit-risk, fraud-detection and recommendation models at scale using PyTorch and MLOps.",                                                         tags:["Python","PyTorch","MLOps","Kubernetes","SQL"],                        applyUrl:"https://www.linkedin.com/jobs/search/?keywords=CRED%20Machine%20Learning%20Engineer&location=Bengaluru", postedAt:new Date(Date.now()-2*86400000).toISOString(), source:"Resumo" },
+  { id:"a1",  title:"Machine Learning Engineer", company:"CRED", companyLogo:null, location:"Bengaluru, Karnataka",    isRemote:true,  type:"Hybrid",      salary:"₹28L – ₹45L / year",          description:"Build credit-risk, fraud-detection and recommendation models at scale using PyTorch and MLOps.",                                                         tags:["Python","PyTorch","MLOps","Kubernetes","SQL"],                        applyUrl:"https://careers.cred.club/jobs?search=Machine%20Learning%20Engineer", postedAt:new Date(Date.now()-2*86400000).toISOString(), source:"Resumo" },
   { id:"a2",  title:"AI/ML Research Engineer", company:"Google India", companyLogo:null, location:"Hyderabad, Telangana",    isRemote:false, type:"Full-Time",   salary:"₹45L – ₹90L / year",          description:"Research and productionise large language models and multimodal AI systems for Google's product suite.",                                                  tags:["Python","TensorFlow","JAX","LLMs","Research"],                        applyUrl:"https://www.google.com/about/careers/applications/jobs/results/?q=AI%20ML%20Research%20Engineer&location=India", postedAt:new Date(Date.now()-1*86400000).toISOString(), source:"Resumo" },
-  { id:"a3",  title:"Generative AI Engineer", company:"Accenture India", companyLogo:null, location:"Pune, Maharashtra",        isRemote:true,  type:"Hybrid",      salary:"₹20L – ₹38L / year",          description:"Build enterprise GenAI solutions using LLMs, RAG pipelines and prompt engineering for Fortune 500 clients.",                                             tags:["LangChain","OpenAI","RAG","Python","Vector DBs"],                     applyUrl:"https://www.linkedin.com/jobs/search/?keywords=Accenture%20India%20Generative%20AI%20Engineer&location=Pune", postedAt:new Date(Date.now()-2*86400000).toISOString(), source:"Resumo" },
-  { id:"a4",  title:"MLOps Engineer", company:"BrowserStack", companyLogo:null, location:"Mumbai, Maharashtra",      isRemote:false, type:"Full-Time",   salary:"₹22L – ₹36L / year",          description:"Design and maintain ML infrastructure, model serving pipelines, and monitoring systems.",                                                                tags:["MLflow","Kubeflow","Docker","Python","Prometheus"],                   applyUrl:"https://www.linkedin.com/jobs/search/?keywords=BrowserStack%20MLOps%20Engineer&location=Mumbai", postedAt:new Date(Date.now()-3*86400000).toISOString(), source:"Resumo" },
-  { id:"a5",  title:"AI Product Engineer – LLM", company:"Sarvam AI", companyLogo:null, location:"Bengaluru, Karnataka",    isRemote:true,  type:"Remote",      salary:"₹30L – ₹55L / year",          description:"Work on India's open-source LLM for Indian languages. Fine-tune, evaluate and deploy models at scale.",                                                   tags:["Python","Transformers","RLHF","Indic NLP","FastAPI"],                 applyUrl:"https://www.linkedin.com/jobs/search/?keywords=Sarvam%20AI%20AI%20Product%20Engineer%20LLM&location=Bengaluru", postedAt:new Date(Date.now()-1*86400000).toISOString(), source:"Resumo" },
-  { id:"a6",  title:"Deep Learning Engineer", company:"Nvidia India", companyLogo:null, location:"Pune, Maharashtra",        isRemote:false, type:"Full-Time",   salary:"₹35L – ₹65L / year",          description:"Design and optimise deep learning models for GPU-accelerated inference on Nvidia's CUDA platform.",                                                       tags:["CUDA","PyTorch","C++","Deep Learning","TensorRT"],                    applyUrl:"https://www.linkedin.com/jobs/search/?keywords=Nvidia%20India%20Deep%20Learning%20Engineer&location=Pune", postedAt:new Date(Date.now()-2*86400000).toISOString(), source:"Resumo" },
+  { id:"a3",  title:"Generative AI Engineer", company:"Accenture India", companyLogo:null, location:"Pune, Maharashtra",        isRemote:true,  type:"Hybrid",      salary:"₹20L – ₹38L / year",          description:"Build enterprise GenAI solutions using LLMs, RAG pipelines and prompt engineering for Fortune 500 clients.",                                             tags:["LangChain","OpenAI","RAG","Python","Vector DBs"],                     applyUrl:"https://www.accenture.com/in-en/careers/jobsearch?jk=Generative%20AI%20Engineer", postedAt:new Date(Date.now()-2*86400000).toISOString(), source:"Resumo" },
+  { id:"a4",  title:"MLOps Engineer", company:"BrowserStack", companyLogo:null, location:"Mumbai, Maharashtra",      isRemote:false, type:"Full-Time",   salary:"₹22L – ₹36L / year",          description:"Design and maintain ML infrastructure, model serving pipelines, and monitoring systems.",                                                                tags:["MLflow","Kubeflow","Docker","Python","Prometheus"],                   applyUrl:"https://www.browserstack.com/careers?search=MLOps%20Engineer#open-roles", postedAt:new Date(Date.now()-3*86400000).toISOString(), source:"Resumo" },
+  { id:"a5",  title:"AI Product Engineer – LLM", company:"Sarvam AI", companyLogo:null, location:"Bengaluru, Karnataka",    isRemote:true,  type:"Remote",      salary:"₹30L – ₹55L / year",          description:"Work on India's open-source LLM for Indian languages. Fine-tune, evaluate and deploy models at scale.",                                                   tags:["Python","Transformers","RLHF","Indic NLP","FastAPI"],                 applyUrl:"https://www.sarvam.ai/careers?search=AI%20Product%20Engineer%20LLM", postedAt:new Date(Date.now()-1*86400000).toISOString(), source:"Resumo" },
+  { id:"a6",  title:"Deep Learning Engineer", company:"Nvidia India", companyLogo:null, location:"Pune, Maharashtra",        isRemote:false, type:"Full-Time",   salary:"₹35L – ₹65L / year",          description:"Design and optimise deep learning models for GPU-accelerated inference on Nvidia's CUDA platform.",                                                       tags:["CUDA","PyTorch","C++","Deep Learning","TensorRT"],                    applyUrl:"https://nvidia.wd5.myworkdayjobs.com/NVIDIAExternalCareerSite?q=Deep%20Learning%20Engineer", postedAt:new Date(Date.now()-2*86400000).toISOString(), source:"Resumo" },
 
   // ── DevOps / Cloud / Infra ────────────────────────────────────────────────
-  { id:"i1",  title:"DevOps Engineer", company:"Flipkart", companyLogo:null, location:"Bengaluru, Karnataka",    isRemote:false, type:"Full-Time",   salary:"₹18L – ₹30L / year",          description:"Own CI/CD infrastructure, Kubernetes clusters and cloud cost-optimisation for Flipkart's 400M+ user platform.",                                         tags:["Kubernetes","Terraform","AWS","CI/CD","Go"],                          applyUrl:"https://www.linkedin.com/jobs/search/?keywords=Flipkart%20DevOps%20Engineer&location=Bengaluru", postedAt:new Date(Date.now()-4*86400000).toISOString(), source:"Resumo" },
-  { id:"i2",  title:"Site Reliability Engineer (SRE)", company:"Microsoft India", companyLogo:null, location:"Hyderabad, Telangana",    isRemote:false, type:"Full-Time",   salary:"₹28L – ₹50L / year",          description:"Ensure reliability and performance of Azure cloud services at a massive global scale.",                                                                   tags:["Azure","Kubernetes","Python","Prometheus","Grafana"],                 applyUrl:"https://www.linkedin.com/jobs/search/?keywords=Microsoft%20India%20Site%20Reliability%20Engineer%20SRE&location=Hyderabad", postedAt:new Date(Date.now()-2*86400000).toISOString(), source:"Resumo" },
-  { id:"i3",  title:"Network Engineer", company:"Airtel", companyLogo:null, location:"Delhi, Delhi",             isRemote:false, type:"Full-Time",   salary:"₹10L – ₹18L / year",          description:"Design, deploy and maintain Airtel's 5G and fibre network infrastructure across India.",                                                                 tags:["Networking","CCNA","BGP","MPLS","Network Security"],                  applyUrl:"https://www.linkedin.com/jobs/search/?keywords=Airtel%20Network%20Engineer&location=Delhi", postedAt:new Date(Date.now()-3*86400000).toISOString(), source:"Resumo" },
+  { id:"i1",  title:"DevOps Engineer", company:"Flipkart", companyLogo:null, location:"Bengaluru, Karnataka",    isRemote:false, type:"Full-Time",   salary:"₹18L – ₹30L / year",          description:"Own CI/CD infrastructure, Kubernetes clusters and cloud cost-optimisation for Flipkart's 400M+ user platform.",                                         tags:["Kubernetes","Terraform","AWS","CI/CD","Go"],                          applyUrl:"https://www.flipkartcareers.com/#!/searchjobs?q=DevOps%20Engineer", postedAt:new Date(Date.now()-4*86400000).toISOString(), source:"Resumo" },
+  { id:"i2",  title:"Site Reliability Engineer (SRE)", company:"Microsoft India", companyLogo:null, location:"Hyderabad, Telangana",    isRemote:false, type:"Full-Time",   salary:"₹28L – ₹50L / year",          description:"Ensure reliability and performance of Azure cloud services at a massive global scale.",                                                                   tags:["Azure","Kubernetes","Python","Prometheus","Grafana"],                 applyUrl:"https://careers.microsoft.com/v2/global/en/home.html#search?q=Site%20Reliability%20Engineer%20SRE&l=en_us", postedAt:new Date(Date.now()-2*86400000).toISOString(), source:"Resumo" },
+  { id:"i3",  title:"Network Engineer", company:"Airtel", companyLogo:null, location:"Delhi, Delhi",             isRemote:false, type:"Full-Time",   salary:"₹10L – ₹18L / year",          description:"Design, deploy and maintain Airtel's 5G and fibre network infrastructure across India.",                                                                 tags:["Networking","CCNA","BGP","MPLS","Network Security"],                  applyUrl:"https://www.airtel.in/careers/job-search?keyword=Network%20Engineer", postedAt:new Date(Date.now()-3*86400000).toISOString(), source:"Resumo" },
 
   // ── Cybersecurity ─────────────────────────────────────────────────────────
-  { id:"c1",  title:"Cybersecurity Analyst", company:"Deloitte India", companyLogo:null, location:"Mumbai, Maharashtra",      isRemote:false, type:"Full-Time",   salary:"₹12L – ₹22L / year",          description:"Monitor, detect and respond to cyber threats for Deloitte's enterprise clients. SIEM and SOC experience required.",                                       tags:["SIEM","SOC","Incident Response","OWASP","Python"],                    applyUrl:"https://www.linkedin.com/jobs/search/?keywords=Deloitte%20India%20Cybersecurity%20Analyst&location=Mumbai", postedAt:new Date(Date.now()-2*86400000).toISOString(), source:"Resumo" },
-  { id:"c2",  title:"Penetration Tester", company:"Razorpay", companyLogo:null, location:"Bengaluru, Karnataka",    isRemote:false, type:"Full-Time",   salary:"₹18L – ₹32L / year",          description:"Conduct web, mobile and API penetration testing for Razorpay's fintech infrastructure. CEH / OSCP preferred.",                                          tags:["Penetration Testing","Burp Suite","OWASP","Linux","Python"],          applyUrl:"https://www.linkedin.com/jobs/search/?keywords=Razorpay%20Penetration%20Tester&location=Bengaluru", postedAt:new Date(Date.now()-1*86400000).toISOString(), source:"Resumo" },
-  { id:"c3",  title:"Information Security Engineer", company:"HDFC Bank", companyLogo:null, location:"Mumbai, Maharashtra",      isRemote:false, type:"Full-Time",   salary:"₹16L – ₹28L / year",          description:"Implement information security policies, vulnerability management and compliance frameworks.",                                                             tags:["ISO 27001","VAPT","Firewall","DLP","Risk Management"],                applyUrl:"https://www.linkedin.com/jobs/search/?keywords=HDFC%20Bank%20Information%20Security%20Engineer&location=Mumbai", postedAt:new Date(Date.now()-3*86400000).toISOString(), source:"Resumo" },
+  { id:"c1",  title:"Cybersecurity Analyst", company:"Deloitte India", companyLogo:null, location:"Mumbai, Maharashtra",      isRemote:false, type:"Full-Time",   salary:"₹12L – ₹22L / year",          description:"Monitor, detect and respond to cyber threats for Deloitte's enterprise clients. SIEM and SOC experience required.",                                       tags:["SIEM","SOC","Incident Response","OWASP","Python"],                    applyUrl:"https://jobsindia.deloitte.com/search/?q=Cybersecurity%20Analyst", postedAt:new Date(Date.now()-2*86400000).toISOString(), source:"Resumo" },
+  { id:"c2",  title:"Penetration Tester", company:"Razorpay", companyLogo:null, location:"Bengaluru, Karnataka",    isRemote:false, type:"Full-Time",   salary:"₹18L – ₹32L / year",          description:"Conduct web, mobile and API penetration testing for Razorpay's fintech infrastructure. CEH / OSCP preferred.",                                          tags:["Penetration Testing","Burp Suite","OWASP","Linux","Python"],          applyUrl:"https://job-boards.greenhouse.io/razorpay?query=Penetration%20Tester", postedAt:new Date(Date.now()-1*86400000).toISOString(), source:"Resumo" },
+  { id:"c3",  title:"Information Security Engineer", company:"HDFC Bank", companyLogo:null, location:"Mumbai, Maharashtra",      isRemote:false, type:"Full-Time",   salary:"₹16L – ₹28L / year",          description:"Implement information security policies, vulnerability management and compliance frameworks.",                                                             tags:["ISO 27001","VAPT","Firewall","DLP","Risk Management"],                applyUrl:"https://www.hdfcbank.com/personal/about-us/careers?keyword=Information%20Security%20Engineer", postedAt:new Date(Date.now()-3*86400000).toISOString(), source:"Resumo" },
 
   // ── UI / UX Design ────────────────────────────────────────────────────────
-  { id:"u1",  title:"Product Designer (UI/UX)", company:"Swiggy", companyLogo:null, location:"Bengaluru, Karnataka",    isRemote:false, type:"Full-Time",   salary:"₹18L – ₹32L / year",          description:"Design end-to-end product experiences for Swiggy's consumer, restaurant and delivery apps.",                                                            tags:["Figma","User Research","Prototyping","Design Systems","Usability Testing"], applyUrl:"https://www.linkedin.com/jobs/search/?keywords=Swiggy%20Product%20Designer%20UI%20UX&location=Bengaluru", postedAt:new Date(Date.now()-2*86400000).toISOString(), source:"Resumo" },
-  { id:"u2",  title:"UX Researcher", company:"Flipkart", companyLogo:null, location:"Bengaluru, Karnataka",    isRemote:false, type:"Full-Time",   salary:"₹15L – ₹26L / year",          description:"Conduct user research studies, usability tests and interviews to inform Flipkart's product decisions.",                                                   tags:["User Research","Usability Testing","Surveys","Data Analysis","Figma"], applyUrl:"https://www.linkedin.com/jobs/search/?keywords=Flipkart%20UX%20Researcher&location=Bengaluru", postedAt:new Date(Date.now()-3*86400000).toISOString(), source:"Resumo" },
-  { id:"u3",  title:"UI Designer – Mobile", company:"Juspay", companyLogo:null, location:"Bengaluru, Karnataka",    isRemote:true,  type:"Hybrid",      salary:"₹12L – ₹20L / year",          description:"Create pixel-perfect mobile UI for Juspay's payments SDK used by Amazon, Flipkart and Jio.",                                                            tags:["Figma","Sketch","iOS HIG","Material Design","Prototyping"],           applyUrl:"https://www.linkedin.com/jobs/search/?keywords=Juspay%20UI%20Designer%20Mobile&location=Bengaluru", postedAt:new Date(Date.now()-1*86400000).toISOString(), source:"Resumo" },
-  { id:"u4",  title:"UI/UX Intern", company:"InMobi", companyLogo:null, location:"Bengaluru, Karnataka",    isRemote:false, type:"Internship",  salary:"₹20,000 – ₹35,000 / month",   description:"Assist senior designers in creating ad platform interfaces and conducting competitive design analysis.",                                                   tags:["Figma","Adobe XD","Wireframing","UI Design","Prototyping"],           applyUrl:"https://www.linkedin.com/jobs/search/?keywords=InMobi%20UI%20UX%20Intern&location=Bengaluru", postedAt:new Date(Date.now()-2*86400000).toISOString(), source:"Resumo" },
+  { id:"u1",  title:"Product Designer (UI/UX)", company:"Swiggy", companyLogo:null, location:"Bengaluru, Karnataka",    isRemote:false, type:"Full-Time",   salary:"₹18L – ₹32L / year",          description:"Design end-to-end product experiences for Swiggy's consumer, restaurant and delivery apps.",                                                            tags:["Figma","User Research","Prototyping","Design Systems","Usability Testing"], applyUrl:"https://careers.swiggy.com/?search=Product%20Designer%20UI%20UX#openings", postedAt:new Date(Date.now()-2*86400000).toISOString(), source:"Resumo" },
+  { id:"u2",  title:"UX Researcher", company:"Flipkart", companyLogo:null, location:"Bengaluru, Karnataka",    isRemote:false, type:"Full-Time",   salary:"₹15L – ₹26L / year",          description:"Conduct user research studies, usability tests and interviews to inform Flipkart's product decisions.",                                                   tags:["User Research","Usability Testing","Surveys","Data Analysis","Figma"], applyUrl:"https://www.flipkartcareers.com/#!/searchjobs?q=UX%20Researcher", postedAt:new Date(Date.now()-3*86400000).toISOString(), source:"Resumo" },
+  { id:"u3",  title:"UI Designer – Mobile", company:"Juspay", companyLogo:null, location:"Bengaluru, Karnataka",    isRemote:true,  type:"Hybrid",      salary:"₹12L – ₹20L / year",          description:"Create pixel-perfect mobile UI for Juspay's payments SDK used by Amazon, Flipkart and Jio.",                                                            tags:["Figma","Sketch","iOS HIG","Material Design","Prototyping"],           applyUrl:"https://juspay.in/careers?role=UI%20Designer%20Mobile", postedAt:new Date(Date.now()-1*86400000).toISOString(), source:"Resumo" },
+  { id:"u4",  title:"UI/UX Intern", company:"InMobi", companyLogo:null, location:"Bengaluru, Karnataka",    isRemote:false, type:"Internship",  salary:"₹20,000 – ₹35,000 / month",   description:"Assist senior designers in creating ad platform interfaces and conducting competitive design analysis.",                                                   tags:["Figma","Adobe XD","Wireframing","UI Design","Prototyping"],           applyUrl:"https://www.inmobi.com/company/careers?query=UI%20UX%20Intern", postedAt:new Date(Date.now()-2*86400000).toISOString(), source:"Resumo" },
 
   // ── Product Management ────────────────────────────────────────────────────
-  { id:"p1",  title:"Product Manager – Fintech", company:"PhonePe", companyLogo:null, location:"Bengaluru, Karnataka",    isRemote:false, type:"Full-Time",   salary:"₹32L – ₹55L / year",          description:"Define and execute product roadmap for PhonePe's lending and insurance verticals.",                                                                       tags:["Product Strategy","SQL","A/B Testing","Fintech","Agile"],             applyUrl:"https://www.linkedin.com/jobs/search/?keywords=PhonePe%20Product%20Manager%20Fintech&location=Bengaluru", postedAt:new Date(Date.now()-3*86400000).toISOString(), source:"Resumo" },
-  { id:"p2",  title:"Associate Product Manager", company:"Navi", companyLogo:null, location:"Bengaluru, Karnataka",    isRemote:false, type:"Full-Time",   salary:"₹18L – ₹30L / year",          description:"Own loan origination funnel and drive user growth for Navi's digital lending platform.",                                                                  tags:["Product Management","SQL","User Research","Agile","Jira"],            applyUrl:"https://www.linkedin.com/jobs/search/?keywords=Navi%20Associate%20Product%20Manager&location=Bengaluru", postedAt:new Date(Date.now()-2*86400000).toISOString(), source:"Resumo" },
-  { id:"p3",  title:"Senior Product Manager – Growth", company:"ShareChat", companyLogo:null, location:"Bengaluru, Karnataka",    isRemote:false, type:"Full-Time",   salary:"₹35L – ₹60L / year",          description:"Drive user acquisition, retention and monetisation for ShareChat's 180M monthly active users.",                                                           tags:["Growth Hacking","SQL","A/B Testing","Retention","Funnel Optimisation"], applyUrl:"https://www.linkedin.com/jobs/search/?keywords=ShareChat%20Senior%20Product%20Manager%20Growth&location=Bengaluru", postedAt:new Date(Date.now()-4*86400000).toISOString(), source:"Resumo" },
-  { id:"p4",  title:"Product Manager – AI Platform", company:"Krutrim AI", companyLogo:null, location:"Bengaluru, Karnataka",    isRemote:true,  type:"Remote",      salary:"₹40L – ₹70L / year",          description:"Shape the roadmap for Krutrim's AI platform, working with LLM research and enterprise customers.",                                                        tags:["AI/ML Products","LLMs","B2B SaaS","Roadmapping","API Products"],      applyUrl:"https://www.linkedin.com/jobs/search/?keywords=Krutrim%20AI%20Product%20Manager%20AI%20Platform&location=Bengaluru", postedAt:new Date(Date.now()-1*86400000).toISOString(), source:"Resumo" },
+  { id:"p1",  title:"Product Manager – Fintech", company:"PhonePe", companyLogo:null, location:"Bengaluru, Karnataka",    isRemote:false, type:"Full-Time",   salary:"₹32L – ₹55L / year",          description:"Define and execute product roadmap for PhonePe's lending and insurance verticals.",                                                                       tags:["Product Strategy","SQL","A/B Testing","Fintech","Agile"],             applyUrl:"https://www.phonepe.com/careers/?search=Product%20Manager%20Fintech", postedAt:new Date(Date.now()-3*86400000).toISOString(), source:"Resumo" },
+  { id:"p2",  title:"Associate Product Manager", company:"Navi", companyLogo:null, location:"Bengaluru, Karnataka",    isRemote:false, type:"Full-Time",   salary:"₹18L – ₹30L / year",          description:"Own loan origination funnel and drive user growth for Navi's digital lending platform.",                                                                  tags:["Product Management","SQL","User Research","Agile","Jira"],            applyUrl:"https://navi.com/careers?search=Associate%20Product%20Manager", postedAt:new Date(Date.now()-2*86400000).toISOString(), source:"Resumo" },
+  { id:"p3",  title:"Senior Product Manager – Growth", company:"ShareChat", companyLogo:null, location:"Bengaluru, Karnataka",    isRemote:false, type:"Full-Time",   salary:"₹35L – ₹60L / year",          description:"Drive user acquisition, retention and monetisation for ShareChat's 180M monthly active users.",                                                           tags:["Growth Hacking","SQL","A/B Testing","Retention","Funnel Optimisation"], applyUrl:"https://sharechat.com/careers?search=Senior%20Product%20Manager%20Growth", postedAt:new Date(Date.now()-4*86400000).toISOString(), source:"Resumo" },
+  { id:"p4",  title:"Product Manager – AI Platform", company:"Krutrim AI", companyLogo:null, location:"Bengaluru, Karnataka",    isRemote:true,  type:"Remote",      salary:"₹40L – ₹70L / year",          description:"Shape the roadmap for Krutrim's AI platform, working with LLM research and enterprise customers.",                                                        tags:["AI/ML Products","LLMs","B2B SaaS","Roadmapping","API Products"],      applyUrl:"https://www.olakrutrim.com/careers?search=Product%20Manager%20AI%20Platform", postedAt:new Date(Date.now()-1*86400000).toISOString(), source:"Resumo" },
 
   // ── QA / Testing ──────────────────────────────────────────────────────────
-  { id:"q1",  title:"QA Engineer – Automation", company:"BrowserStack", companyLogo:null, location:"Mumbai, Maharashtra",      isRemote:false, type:"Full-Time",   salary:"₹12L – ₹22L / year",          description:"Build and maintain automation test frameworks for web and mobile using Selenium and Appium.",                                                             tags:["Selenium","Appium","Java","TestNG","CI/CD"],                          applyUrl:"https://www.linkedin.com/jobs/search/?keywords=BrowserStack%20QA%20Engineer%20Automation&location=Mumbai", postedAt:new Date(Date.now()-2*86400000).toISOString(), source:"Resumo" },
+  { id:"q1",  title:"QA Engineer – Automation", company:"BrowserStack", companyLogo:null, location:"Mumbai, Maharashtra",      isRemote:false, type:"Full-Time",   salary:"₹12L – ₹22L / year",          description:"Build and maintain automation test frameworks for web and mobile using Selenium and Appium.",                                                             tags:["Selenium","Appium","Java","TestNG","CI/CD"],                          applyUrl:"https://www.browserstack.com/careers?search=QA%20Engineer%20Automation#open-roles", postedAt:new Date(Date.now()-2*86400000).toISOString(), source:"Resumo" },
   { id:"q2",  title:"SDET – Performance Testing", company:"Amazon India", companyLogo:null, location:"Hyderabad, Telangana",    isRemote:false, type:"Full-Time",   salary:"₹20L – ₹38L / year",          description:"Design and execute performance and load testing strategies for Amazon's checkout and fulfilment systems.",                                                 tags:["JMeter","Gatling","Python","AWS","Load Testing"],                     applyUrl:"https://www.amazon.jobs/en/search?base_query=SDET%20Performance%20Testing&loc_query=India", postedAt:new Date(Date.now()-3*86400000).toISOString(), source:"Resumo" },
-  { id:"q3",  title:"Manual QA Tester", company:"Ixigo", companyLogo:null, location:"Gurugram, Haryana",        isRemote:false, type:"Full-Time",   salary:"₹6L – ₹12L / year",           description:"Perform functional, regression and exploratory testing for Ixigo's travel booking web and mobile apps.",                                                  tags:["Manual Testing","Bug Tracking","JIRA","Test Cases","API Testing"],    applyUrl:"https://www.linkedin.com/jobs/search/?keywords=Ixigo%20Manual%20QA%20Tester&location=Gurugram", postedAt:new Date(Date.now()-4*86400000).toISOString(), source:"Resumo" },
+  { id:"q3",  title:"Manual QA Tester", company:"Ixigo", companyLogo:null, location:"Gurugram, Haryana",        isRemote:false, type:"Full-Time",   salary:"₹6L – ₹12L / year",           description:"Perform functional, regression and exploratory testing for Ixigo's travel booking web and mobile apps.",                                                  tags:["Manual Testing","Bug Tracking","JIRA","Test Cases","API Testing"],    applyUrl:"https://www.ixigo.com/careers?search=Manual%20QA%20Tester", postedAt:new Date(Date.now()-4*86400000).toISOString(), source:"Resumo" },
 
   // ── Finance / Accounting ──────────────────────────────────────────────────
-  { id:"f1",  title:"Chartered Accountant – Finance", company:"Byju's", companyLogo:null, location:"Bengaluru, Karnataka",    isRemote:false, type:"Full-Time",   salary:"₹14L – ₹22L / year",          description:"Manage financial reporting, statutory compliance and audit coordination for Byju's global entities.",                                                    tags:["CA","Financial Reporting","IFRS","Audit","Tally"],                    applyUrl:"https://www.linkedin.com/jobs/search/?keywords=Byju%27s%20Chartered%20Accountant%20Finance&location=Bengaluru", postedAt:new Date(Date.now()-3*86400000).toISOString(), source:"Resumo" },
-  { id:"f2",  title:"Financial Analyst", company:"Zerodha", companyLogo:null, location:"Bengaluru, Karnataka",    isRemote:false, type:"Full-Time",   salary:"₹12L – ₹20L / year",          description:"Analyse financial performance, prepare investor reports and support strategic finance decisions.",                                                        tags:["Financial Modelling","Excel","SQL","Power BI","Valuation"],           applyUrl:"https://www.linkedin.com/jobs/search/?keywords=Zerodha%20Financial%20Analyst&location=Bengaluru", postedAt:new Date(Date.now()-2*86400000).toISOString(), source:"Resumo" },
-  { id:"f3",  title:"Finance & Accounts Intern", company:"Razorpay", companyLogo:null, location:"Bengaluru, Karnataka",    isRemote:false, type:"Internship",  salary:"₹25,000 – ₹40,000 / month",   description:"Assist with GST filing, financial reconciliation and month-end closing processes.",                                                                       tags:["GST","Tally","Excel","Reconciliation","Accounting"],                  applyUrl:"https://www.linkedin.com/jobs/search/?keywords=Razorpay%20Finance%20%26%20Accounts%20Intern&location=Bengaluru", postedAt:new Date(Date.now()-1*86400000).toISOString(), source:"Resumo" },
-  { id:"f4",  title:"Risk & Compliance Manager", company:"ICICI Bank", companyLogo:null, location:"Mumbai, Maharashtra",      isRemote:false, type:"Full-Time",   salary:"₹20L – ₹35L / year",          description:"Oversee credit risk, operational risk and RBI regulatory compliance for ICICI Bank's retail division.",                                                  tags:["Risk Management","RBI Compliance","FEMA","Credit Risk","Basel III"],  applyUrl:"https://www.linkedin.com/jobs/search/?keywords=ICICI%20Bank%20Risk%20%26%20Compliance%20Manager&location=Mumbai", postedAt:new Date(Date.now()-4*86400000).toISOString(), source:"Resumo" },
+  { id:"f1",  title:"Chartered Accountant – Finance", company:"Byju's", companyLogo:null, location:"Bengaluru, Karnataka",    isRemote:false, type:"Full-Time",   salary:"₹14L – ₹22L / year",          description:"Manage financial reporting, statutory compliance and audit coordination for Byju's global entities.",                                                    tags:["CA","Financial Reporting","IFRS","Audit","Tally"],                    applyUrl:"https://byjus.com/careers/?role=Chartered%20Accountant%20Finance", postedAt:new Date(Date.now()-3*86400000).toISOString(), source:"Resumo" },
+  { id:"f2",  title:"Financial Analyst", company:"Zerodha", companyLogo:null, location:"Bengaluru, Karnataka",    isRemote:false, type:"Full-Time",   salary:"₹12L – ₹20L / year",          description:"Analyse financial performance, prepare investor reports and support strategic finance decisions.",                                                        tags:["Financial Modelling","Excel","SQL","Power BI","Valuation"],           applyUrl:"https://zerodha.com/careers/?role=Financial%20Analyst", postedAt:new Date(Date.now()-2*86400000).toISOString(), source:"Resumo" },
+  { id:"f3",  title:"Finance & Accounts Intern", company:"Razorpay", companyLogo:null, location:"Bengaluru, Karnataka",    isRemote:false, type:"Internship",  salary:"₹25,000 – ₹40,000 / month",   description:"Assist with GST filing, financial reconciliation and month-end closing processes.",                                                                       tags:["GST","Tally","Excel","Reconciliation","Accounting"],                  applyUrl:"https://job-boards.greenhouse.io/razorpay?query=Finance%20%26%20Accounts%20Intern", postedAt:new Date(Date.now()-1*86400000).toISOString(), source:"Resumo" },
+  { id:"f4",  title:"Risk & Compliance Manager", company:"ICICI Bank", companyLogo:null, location:"Mumbai, Maharashtra",      isRemote:false, type:"Full-Time",   salary:"₹20L – ₹35L / year",          description:"Oversee credit risk, operational risk and RBI regulatory compliance for ICICI Bank's retail division.",                                                  tags:["Risk Management","RBI Compliance","FEMA","Credit Risk","Basel III"],  applyUrl:"https://www.icicicareers.com/job-search?keyword=Risk%20%26%20Compliance%20Manager", postedAt:new Date(Date.now()-4*86400000).toISOString(), source:"Resumo" },
 
   // ── Human Resources ───────────────────────────────────────────────────────
   { id:"h1",  title:"HR Business Partner", company:"Infosys", companyLogo:null, location:"Pune, Maharashtra",        isRemote:false, type:"Full-Time",   salary:"₹12L – ₹20L / year",          description:"Partner with business leaders on talent planning, performance management and employee engagement.",                                                       tags:["HRBP","Talent Management","Performance Management","HRMS","Labour Law"], applyUrl:"https://career.infosys.com/joblist?keyword=HR%20Business%20Partner", postedAt:new Date(Date.now()-2*86400000).toISOString(), source:"Resumo" },
-  { id:"h2",  title:"Technical Recruiter", company:"Razorpay", companyLogo:null, location:"Bengaluru, Karnataka",    isRemote:false, type:"Full-Time",   salary:"₹10L – ₹18L / year",          description:"Own end-to-end engineering hiring for Razorpay — source, screen and close top tech talent at scale.",                                                    tags:["Technical Recruiting","Boolean Search","ATS","Employer Branding","Stakeholder Management"], applyUrl:"https://www.linkedin.com/jobs/search/?keywords=Razorpay%20Technical%20Recruiter&location=Bengaluru", postedAt:new Date(Date.now()-3*86400000).toISOString(), source:"Resumo" },
-  { id:"h3",  title:"L&D Specialist", company:"Wipro", companyLogo:null, location:"Hyderabad, Telangana",    isRemote:true,  type:"Hybrid",      salary:"₹8L – ₹15L / year",           description:"Design and deliver learning programs for Wipro's 220,000+ employees across technical and behavioural skills.",                                           tags:["Instructional Design","LMS","E-learning","Facilitation","ADDIE"],     applyUrl:"https://www.linkedin.com/jobs/search/?keywords=Wipro%20L%26D%20Specialist&location=Hyderabad", postedAt:new Date(Date.now()-4*86400000).toISOString(), source:"Resumo" },
+  { id:"h2",  title:"Technical Recruiter", company:"Razorpay", companyLogo:null, location:"Bengaluru, Karnataka",    isRemote:false, type:"Full-Time",   salary:"₹10L – ₹18L / year",          description:"Own end-to-end engineering hiring for Razorpay — source, screen and close top tech talent at scale.",                                                    tags:["Technical Recruiting","Boolean Search","ATS","Employer Branding","Stakeholder Management"], applyUrl:"https://job-boards.greenhouse.io/razorpay?query=Technical%20Recruiter", postedAt:new Date(Date.now()-3*86400000).toISOString(), source:"Resumo" },
+  { id:"h3",  title:"L&D Specialist", company:"Wipro", companyLogo:null, location:"Hyderabad, Telangana",    isRemote:true,  type:"Hybrid",      salary:"₹8L – ₹15L / year",           description:"Design and deliver learning programs for Wipro's 220,000+ employees across technical and behavioural skills.",                                           tags:["Instructional Design","LMS","E-learning","Facilitation","ADDIE"],     applyUrl:"https://careers.wipro.com/careers-home/jobs?keywords=L%26D%20Specialist", postedAt:new Date(Date.now()-4*86400000).toISOString(), source:"Resumo" },
 
   // ── Marketing / Growth ────────────────────────────────────────────────────
-  { id:"m1",  title:"Digital Marketing Manager", company:"Urban Company", companyLogo:null, location:"Gurugram, Haryana",        isRemote:false, type:"Full-Time",   salary:"₹12L – ₹22L / year",          description:"Own performance marketing campaigns across Google, Meta and YouTube to drive Urban Company's home services growth.",                                      tags:["Google Ads","Meta Ads","SEO","Analytics","CRM"],                      applyUrl:"https://www.linkedin.com/jobs/search/?keywords=Urban%20Company%20Digital%20Marketing%20Manager&location=Gurugram", postedAt:new Date(Date.now()-2*86400000).toISOString(), source:"Resumo" },
-  { id:"m2",  title:"SEO Specialist", company:"Info Edge (Naukri)", companyLogo:null, location:"Noida, Uttar Pradesh",    isRemote:false, type:"Full-Time",   salary:"₹8L – ₹15L / year",           description:"Drive organic traffic growth for Naukri.com through on-page, off-page and technical SEO strategies.",                                                    tags:["SEO","Google Search Console","Ahrefs","Content Strategy","Technical SEO"], applyUrl:"https://www.linkedin.com/jobs/search/?keywords=Info%20Edge%20Naukri%20SEO%20Specialist&location=Noida", postedAt:new Date(Date.now()-3*86400000).toISOString(), source:"Resumo" },
-  { id:"m3",  title:"Content Marketing Writer", company:"Zoho", companyLogo:null, location:"Chennai, Tamil Nadu",      isRemote:true,  type:"Remote",      salary:"₹7L – ₹13L / year",           description:"Create long-form content, case studies and product documentation for Zoho's SaaS product portfolio.",                                                    tags:["Content Writing","SEO Writing","B2B Marketing","WordPress","Grammarly"], applyUrl:"https://www.linkedin.com/jobs/search/?keywords=Zoho%20Content%20Marketing%20Writer&location=Chennai", postedAt:new Date(Date.now()-1*86400000).toISOString(), source:"Resumo" },
-  { id:"m4",  title:"Growth Marketing Intern", company:"CRED", companyLogo:null, location:"Bengaluru, Karnataka",    isRemote:false, type:"Internship",  salary:"₹30,000 – ₹50,000 / month",   description:"Assist with performance marketing experiments, cohort analysis and A/B testing for user acquisition.",                                                    tags:["Google Ads","A/B Testing","SQL","Excel","Analytics"],                 applyUrl:"https://www.linkedin.com/jobs/search/?keywords=CRED%20Growth%20Marketing%20Intern&location=Bengaluru", postedAt:new Date(Date.now()-2*86400000).toISOString(), source:"Resumo" },
-  { id:"m5",  title:"Brand Manager", company:"Nykaa", companyLogo:null, location:"Mumbai, Maharashtra",      isRemote:false, type:"Full-Time",   salary:"₹15L – ₹25L / year",          description:"Own brand strategy and campaign execution for Nykaa's private label beauty and fashion brands.",                                                         tags:["Brand Strategy","Campaign Management","P&L Management","Agencies","Market Research"], applyUrl:"https://www.linkedin.com/jobs/search/?keywords=Nykaa%20Brand%20Manager&location=Mumbai", postedAt:new Date(Date.now()-4*86400000).toISOString(), source:"Resumo" },
+  { id:"m1",  title:"Digital Marketing Manager", company:"Urban Company", companyLogo:null, location:"Gurugram, Haryana",        isRemote:false, type:"Full-Time",   salary:"₹12L – ₹22L / year",          description:"Own performance marketing campaigns across Google, Meta and YouTube to drive Urban Company's home services growth.",                                      tags:["Google Ads","Meta Ads","SEO","Analytics","CRM"],                      applyUrl:"https://careers.urbancompany.com/?search=Digital%20Marketing%20Manager", postedAt:new Date(Date.now()-2*86400000).toISOString(), source:"Resumo" },
+  { id:"m2",  title:"SEO Specialist", company:"Info Edge (Naukri)", companyLogo:null, location:"Noida, Uttar Pradesh",    isRemote:false, type:"Full-Time",   salary:"₹8L – ₹15L / year",           description:"Drive organic traffic growth for Naukri.com through on-page, off-page and technical SEO strategies.",                                                    tags:["SEO","Google Search Console","Ahrefs","Content Strategy","Technical SEO"], applyUrl:"https://www.infoedge.in/careers.html?role=SEO%20Specialist", postedAt:new Date(Date.now()-3*86400000).toISOString(), source:"Resumo" },
+  { id:"m3",  title:"Content Marketing Writer", company:"Zoho", companyLogo:null, location:"Chennai, Tamil Nadu",      isRemote:true,  type:"Remote",      salary:"₹7L – ₹13L / year",           description:"Create long-form content, case studies and product documentation for Zoho's SaaS product portfolio.",                                                    tags:["Content Writing","SEO Writing","B2B Marketing","WordPress","Grammarly"], applyUrl:"https://www.zoho.com/careers/jobdetails/?role=Content%20Marketing%20Writer", postedAt:new Date(Date.now()-1*86400000).toISOString(), source:"Resumo" },
+  { id:"m4",  title:"Growth Marketing Intern", company:"CRED", companyLogo:null, location:"Bengaluru, Karnataka",    isRemote:false, type:"Internship",  salary:"₹30,000 – ₹50,000 / month",   description:"Assist with performance marketing experiments, cohort analysis and A/B testing for user acquisition.",                                                    tags:["Google Ads","A/B Testing","SQL","Excel","Analytics"],                 applyUrl:"https://careers.cred.club/jobs?search=Growth%20Marketing%20Intern", postedAt:new Date(Date.now()-2*86400000).toISOString(), source:"Resumo" },
+  { id:"m5",  title:"Brand Manager", company:"Nykaa", companyLogo:null, location:"Mumbai, Maharashtra",      isRemote:false, type:"Full-Time",   salary:"₹15L – ₹25L / year",          description:"Own brand strategy and campaign execution for Nykaa's private label beauty and fashion brands.",                                                         tags:["Brand Strategy","Campaign Management","P&L Management","Agencies","Market Research"], applyUrl:"https://www.nykaa.com/careers?search=Brand%20Manager", postedAt:new Date(Date.now()-4*86400000).toISOString(), source:"Resumo" },
 
   // ── Sales / Business Development ──────────────────────────────────────────
-  { id:"b1",  title:"Sales Manager – B2B SaaS", company:"Zoho", companyLogo:null, location:"Chennai, Tamil Nadu",      isRemote:false, type:"Full-Time",   salary:"₹12L – ₹22L / year",          description:"Own the complete B2B sales cycle for Zoho One suite — prospecting to closing enterprise deals.",                                                         tags:["B2B Sales","SaaS","CRM","Negotiation","Pipeline Management"],         applyUrl:"https://www.linkedin.com/jobs/search/?keywords=Zoho%20Sales%20Manager%20B2B%20SaaS&location=Chennai", postedAt:new Date(Date.now()-2*86400000).toISOString(), source:"Resumo" },
-  { id:"b2",  title:"Business Development Executive", company:"Meesho", companyLogo:null, location:"Bengaluru, Karnataka",    isRemote:false, type:"Full-Time",   salary:"₹7L – ₹14L / year",           description:"Onboard new sellers onto Meesho's marketplace and drive their GMV growth through category expansion.",                                                    tags:["Business Development","Seller Onboarding","Negotiation","Excel","Market Research"], applyUrl:"https://www.linkedin.com/jobs/search/?keywords=Meesho%20Business%20Development%20Executive&location=Bengaluru", postedAt:new Date(Date.now()-3*86400000).toISOString(), source:"Resumo" },
-  { id:"b3",  title:"Enterprise Account Executive", company:"Freshworks", companyLogo:null, location:"Hyderabad, Telangana",    isRemote:true,  type:"Remote",      salary:"₹18L – ₹35L / year",          description:"Manage and grow enterprise accounts for Freshsales CRM across BFSI and manufacturing verticals.",                                                         tags:["Enterprise Sales","CRM","Solution Selling","Account Management","SaaS"], applyUrl:"https://www.linkedin.com/jobs/search/?keywords=Freshworks%20Enterprise%20Account%20Executive&location=Hyderabad", postedAt:new Date(Date.now()-1*86400000).toISOString(), source:"Resumo" },
+  { id:"b1",  title:"Sales Manager – B2B SaaS", company:"Zoho", companyLogo:null, location:"Chennai, Tamil Nadu",      isRemote:false, type:"Full-Time",   salary:"₹12L – ₹22L / year",          description:"Own the complete B2B sales cycle for Zoho One suite — prospecting to closing enterprise deals.",                                                         tags:["B2B Sales","SaaS","CRM","Negotiation","Pipeline Management"],         applyUrl:"https://www.zoho.com/careers/jobdetails/?role=Sales%20Manager%20B2B%20SaaS", postedAt:new Date(Date.now()-2*86400000).toISOString(), source:"Resumo" },
+  { id:"b2",  title:"Business Development Executive", company:"Meesho", companyLogo:null, location:"Bengaluru, Karnataka",    isRemote:false, type:"Full-Time",   salary:"₹7L – ₹14L / year",           description:"Onboard new sellers onto Meesho's marketplace and drive their GMV growth through category expansion.",                                                    tags:["Business Development","Seller Onboarding","Negotiation","Excel","Market Research"], applyUrl:"https://meesho.io/jobs?search=Business%20Development%20Executive", postedAt:new Date(Date.now()-3*86400000).toISOString(), source:"Resumo" },
+  { id:"b3",  title:"Enterprise Account Executive", company:"Freshworks", companyLogo:null, location:"Hyderabad, Telangana",    isRemote:true,  type:"Remote",      salary:"₹18L – ₹35L / year",          description:"Manage and grow enterprise accounts for Freshsales CRM across BFSI and manufacturing verticals.",                                                         tags:["Enterprise Sales","CRM","Solution Selling","Account Management","SaaS"], applyUrl:"https://jobs.lever.co/freshworks?query=Enterprise%20Account%20Executive", postedAt:new Date(Date.now()-1*86400000).toISOString(), source:"Resumo" },
 
   // ── Operations / Supply Chain ─────────────────────────────────────────────
-  { id:"o1",  title:"Operations Manager – Logistics", company:"Delhivery", companyLogo:null, location:"Gurugram, Haryana",        isRemote:false, type:"Full-Time",   salary:"₹14L – ₹24L / year",          description:"Manage last-mile delivery operations for Delhivery's network covering 2,300+ cities.",                                                                   tags:["Logistics","Supply Chain","SLA Management","Excel","Operations"],     applyUrl:"https://www.linkedin.com/jobs/search/?keywords=Delhivery%20Operations%20Manager%20Logistics&location=Gurugram", postedAt:new Date(Date.now()-2*86400000).toISOString(), source:"Resumo" },
-  { id:"o2",  title:"Supply Chain Analyst", company:"Reliance Retail", companyLogo:null, location:"Mumbai, Maharashtra",      isRemote:false, type:"Full-Time",   salary:"₹10L – ₹18L / year",          description:"Analyse inventory, demand forecasting and vendor performance for Reliance's retail network.",                                                           tags:["Supply Chain","SAP","Excel","SQL","Demand Forecasting"],              applyUrl:"https://www.linkedin.com/jobs/search/?keywords=Reliance%20Retail%20Supply%20Chain%20Analyst&location=Mumbai", postedAt:new Date(Date.now()-3*86400000).toISOString(), source:"Resumo" },
+  { id:"o1",  title:"Operations Manager – Logistics", company:"Delhivery", companyLogo:null, location:"Gurugram, Haryana",        isRemote:false, type:"Full-Time",   salary:"₹14L – ₹24L / year",          description:"Manage last-mile delivery operations for Delhivery's network covering 2,300+ cities.",                                                                   tags:["Logistics","Supply Chain","SLA Management","Excel","Operations"],     applyUrl:"https://www.delhivery.com/careers/?search=Operations%20Manager%20Logistics", postedAt:new Date(Date.now()-2*86400000).toISOString(), source:"Resumo" },
+  { id:"o2",  title:"Supply Chain Analyst", company:"Reliance Retail", companyLogo:null, location:"Mumbai, Maharashtra",      isRemote:false, type:"Full-Time",   salary:"₹10L – ₹18L / year",          description:"Analyse inventory, demand forecasting and vendor performance for Reliance's retail network.",                                                           tags:["Supply Chain","SAP","Excel","SQL","Demand Forecasting"],              applyUrl:"https://www.relianceretail.com/careers.html?keyword=Supply%20Chain%20Analyst", postedAt:new Date(Date.now()-3*86400000).toISOString(), source:"Resumo" },
 
   // ── Customer Success ──────────────────────────────────────────────────────
-  { id:"cs1", title:"Customer Success Manager", company:"Leadsquared", companyLogo:null, location:"Bengaluru, Karnataka",    isRemote:false, type:"Full-Time",   salary:"₹10L – ₹18L / year",          description:"Own onboarding, adoption and renewal of enterprise CRM clients in EdTech and BFSI verticals.",                                                           tags:["Customer Success","SaaS","CRM","NPS","Stakeholder Management"],       applyUrl:"https://www.linkedin.com/jobs/search/?keywords=Leadsquared%20Customer%20Success%20Manager&location=Bengaluru", postedAt:new Date(Date.now()-2*86400000).toISOString(), source:"Resumo" },
-  { id:"cs2", title:"Technical Support Engineer", company:"Zoho", companyLogo:null, location:"Chennai, Tamil Nadu",      isRemote:false, type:"Full-Time",   salary:"₹6L – ₹12L / year",           description:"Resolve technical issues for Zoho's global customers via email, chat and video calls.",                                                                  tags:["Technical Support","REST APIs","MySQL","Troubleshooting","Zendesk"],  applyUrl:"https://www.linkedin.com/jobs/search/?keywords=Zoho%20Technical%20Support%20Engineer&location=Chennai", postedAt:new Date(Date.now()-3*86400000).toISOString(), source:"Resumo" },
+  { id:"cs1", title:"Customer Success Manager", company:"Leadsquared", companyLogo:null, location:"Bengaluru, Karnataka",    isRemote:false, type:"Full-Time",   salary:"₹10L – ₹18L / year",          description:"Own onboarding, adoption and renewal of enterprise CRM clients in EdTech and BFSI verticals.",                                                           tags:["Customer Success","SaaS","CRM","NPS","Stakeholder Management"],       applyUrl:"https://www.leadsquared.com/careers/?role=Customer%20Success%20Manager", postedAt:new Date(Date.now()-2*86400000).toISOString(), source:"Resumo" },
+  { id:"cs2", title:"Technical Support Engineer", company:"Zoho", companyLogo:null, location:"Chennai, Tamil Nadu",      isRemote:false, type:"Full-Time",   salary:"₹6L – ₹12L / year",           description:"Resolve technical issues for Zoho's global customers via email, chat and video calls.",                                                                  tags:["Technical Support","REST APIs","MySQL","Troubleshooting","Zendesk"],  applyUrl:"https://www.zoho.com/careers/jobdetails/?role=Technical%20Support%20Engineer", postedAt:new Date(Date.now()-3*86400000).toISOString(), source:"Resumo" },
 
   // ── EdTech / Education ────────────────────────────────────────────────────
-  { id:"e1",  title:"Curriculum Designer – Coding", company:"upGrad", companyLogo:null, location:"Mumbai, Maharashtra",      isRemote:true,  type:"Remote",      salary:"₹10L – ₹18L / year",          description:"Design and develop programming curricula for upGrad's PG Data Science and Full Stack programmes.",                                                       tags:["Curriculum Design","Python","Data Science","LMS","Instructional Design"], applyUrl:"https://www.linkedin.com/jobs/search/?keywords=upGrad%20Curriculum%20Designer%20Coding&location=Mumbai", postedAt:new Date(Date.now()-2*86400000).toISOString(), source:"Resumo" },
-  { id:"e2",  title:"Academic Mentor – Data Science", company:"Scaler", companyLogo:null, location:"Bengaluru, Karnataka",    isRemote:true,  type:"Part-Time",   salary:"₹800 – ₹1,500 / hour",        description:"Mentor Scaler students on Data Science projects, Python, ML algorithms and interview preparation.",                                                       tags:["Data Science","Python","Machine Learning","Mentoring","Statistics"],  applyUrl:"https://www.linkedin.com/jobs/search/?keywords=Scaler%20Academic%20Mentor%20Data%20Science&location=Bengaluru", postedAt:new Date(Date.now()-1*86400000).toISOString(), source:"Resumo" },
+  { id:"e1",  title:"Curriculum Designer – Coding", company:"upGrad", companyLogo:null, location:"Mumbai, Maharashtra",      isRemote:true,  type:"Remote",      salary:"₹10L – ₹18L / year",          description:"Design and develop programming curricula for upGrad's PG Data Science and Full Stack programmes.",                                                       tags:["Curriculum Design","Python","Data Science","LMS","Instructional Design"], applyUrl:"https://www.upgrad.com/careers/?search=Curriculum%20Designer%20Coding", postedAt:new Date(Date.now()-2*86400000).toISOString(), source:"Resumo" },
+  { id:"e2",  title:"Academic Mentor – Data Science", company:"Scaler", companyLogo:null, location:"Bengaluru, Karnataka",    isRemote:true,  type:"Part-Time",   salary:"₹800 – ₹1,500 / hour",        description:"Mentor Scaler students on Data Science projects, Python, ML algorithms and interview preparation.",                                                       tags:["Data Science","Python","Machine Learning","Mentoring","Statistics"],  applyUrl:"https://www.scaler.com/careers/?search=Academic%20Mentor%20Data%20Science", postedAt:new Date(Date.now()-1*86400000).toISOString(), source:"Resumo" },
 ];
 
 export default function JobSearchPage() {
@@ -655,6 +744,11 @@ export default function JobSearchPage() {
                     <span className={`rounded-full border px-2.5 py-0.5 text-[10px] font-semibold ${typeBadgeClass(job.type)}`}>
                       {job.isRemote ? "Remote" : job.type}
                     </span>
+                    {job.id && (
+                      <span className="rounded bg-[var(--bg-muted)] border border-[var(--border)] px-2 py-0.5 text-[10px] font-mono text-[var(--text-muted)]" title={`Requisition / Job ID: ${job.id}`}>
+                        ID: {job.id.toUpperCase()}
+                      </span>
+                    )}
                     {job.postedAt && (
                       <span className="text-[10px] text-[var(--text-muted)]">{timeAgo(job.postedAt)}</span>
                     )}
