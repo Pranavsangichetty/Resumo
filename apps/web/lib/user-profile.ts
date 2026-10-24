@@ -54,7 +54,23 @@ export interface UserProfileCertification {
   credentialUrl: string;
 }
 
+export interface UserProfileAward {
+  id: string;
+  title: string;
+  issuer: string;
+  date: string;
+  description: string;
+}
+
+export interface UserProfileResumeFile {
+  name: string;
+  size: string;
+  uploadedAt: string;
+  dataUrl?: string;
+}
+
 export interface UserProfile {
+  avatarUrl?: string;
   personal: UserProfilePersonal;
   summary: string;
   skills: string[];
@@ -62,11 +78,14 @@ export interface UserProfile {
   education: UserProfileEducation[];
   projects: UserProfileProject[];
   certifications: UserProfileCertification[];
+  awards: UserProfileAward[];
+  resumeFile?: UserProfileResumeFile | null;
   languages: string[];
   updatedAt?: string;
 }
 
 export const defaultUserProfile: UserProfile = {
+  avatarUrl: "",
   personal: {
     fullName: "",
     headline: "",
@@ -88,6 +107,8 @@ export const defaultUserProfile: UserProfile = {
   education: [],
   projects: [],
   certifications: [],
+  awards: [],
+  resumeFile: null,
   languages: [],
 };
 
@@ -109,6 +130,7 @@ export function getUserProfile(userId?: number | string | null): UserProfile {
     return {
       ...defaultUserProfile,
       ...parsed,
+      avatarUrl: parsed.avatarUrl || "",
       personal: {
         ...defaultUserProfile.personal,
         ...(parsed.personal || {}),
@@ -118,6 +140,8 @@ export function getUserProfile(userId?: number | string | null): UserProfile {
       education: Array.isArray(parsed.education) ? parsed.education : [],
       projects: Array.isArray(parsed.projects) ? parsed.projects : [],
       certifications: Array.isArray(parsed.certifications) ? parsed.certifications : [],
+      awards: Array.isArray(parsed.awards) ? parsed.awards : [],
+      resumeFile: parsed.resumeFile || null,
       languages: Array.isArray(parsed.languages) ? parsed.languages : [],
     };
   } catch (e) {
@@ -137,7 +161,7 @@ export function saveUserProfile(profile: UserProfile, userId?: number | string |
     const jsonStr = JSON.stringify(toSave);
     const key = getUserProfileKey(userId);
     localStorage.setItem(key, jsonStr);
-    localStorage.setItem(PROFILE_KEY, jsonStr); // Also keep master fallback
+    localStorage.setItem(PROFILE_KEY, jsonStr); // master fallback
   } catch (e) {
     console.error("Failed to save user profile to localStorage:", e);
   }
@@ -154,13 +178,22 @@ export function calculateProfileCompleteness(profile: UserProfile): {
   const tips: string[] = [];
   let score = 0;
 
-  // Personal Info (20%)
+  // Profile Picture (10%)
+  if (profile.avatarUrl) {
+    score += 10;
+    completedSections.push("Profile Photo");
+  } else {
+    missingSections.push("Profile Photo");
+    tips.push("Upload a profile photo to stand out to recruiters.");
+  }
+
+  // Personal Info (15%)
   const hasBasicContact =
     Boolean(profile.personal.fullName?.trim()) &&
     Boolean(profile.personal.email?.trim()) &&
     Boolean(profile.personal.phone?.trim());
   if (hasBasicContact) {
-    score += 20;
+    score += 15;
     completedSections.push("Contact Details");
   } else {
     missingSections.push("Full Name, Email & Phone");
@@ -176,9 +209,9 @@ export function calculateProfileCompleteness(profile: UserProfile): {
     tips.push("Add a professional headline and current city.");
   }
 
-  // Professional Summary (15%)
+  // Professional Summary (10%)
   if (profile.summary?.trim() && profile.summary.trim().length > 30) {
-    score += 15;
+    score += 10;
     completedSections.push("Professional Summary");
   } else {
     missingSections.push("Summary");
@@ -203,26 +236,26 @@ export function calculateProfileCompleteness(profile: UserProfile): {
     tips.push("Add your work history or internships.");
   }
 
-  // Education (15%)
+  // Education (10%)
   if (profile.education && profile.education.length > 0) {
-    score += 15;
+    score += 10;
     completedSections.push("Education");
   } else {
     missingSections.push("Education");
     tips.push("Add your highest qualification or degree.");
   }
 
-  // Projects or Certifications (10%)
+  // Projects or Certifications or Awards (15%)
   if (
     (profile.projects && profile.projects.length > 0) ||
     (profile.certifications && profile.certifications.length > 0) ||
-    Boolean(profile.personal.linkedin?.trim() || profile.personal.github?.trim())
+    (profile.awards && profile.awards.length > 0)
   ) {
-    score += 10;
-    completedSections.push("Projects / Links");
+    score += 15;
+    completedSections.push("Projects / Certifications / Awards");
   } else {
-    missingSections.push("Projects, Certifications or Links");
-    tips.push("Include a project, certification, or your LinkedIn/GitHub URL.");
+    missingSections.push("Projects, Certifications, or Awards");
+    tips.push("Add at least 1 project, certification, or award.");
   }
 
   return {
@@ -280,7 +313,13 @@ export function profileToResumeData(profile: UserProfile): ResumeData {
       issueDate: cert.issueDate || "",
       credentialUrl: cert.credentialUrl || "",
     })),
-    courses: [],
+    courses: (profile.awards || []).map((award) => ({
+      id: award.id || Math.random().toString(36).substring(2, 9),
+      name: award.title || "",
+      issuer: award.issuer || "",
+      issueDate: award.date || "",
+      credentialUrl: award.description || "",
+    })),
   };
 }
 
@@ -349,6 +388,7 @@ export function resumeDataToProfile(
             credentialUrl: cert.credentialUrl || "",
           }))
         : base.certifications,
+    awards: base.awards || [],
     languages: base.languages || [],
     updatedAt: new Date().toISOString(),
   };

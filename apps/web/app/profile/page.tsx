@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import type { ChangeEvent } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   UserProfile,
@@ -14,8 +15,9 @@ import {
   UserProfileEducation,
   UserProfileProject,
   UserProfileCertification,
+  UserProfileAward,
 } from "@/lib/user-profile";
-import { createResume, getResumes } from "@/lib/api";
+import { createResume, getResumes, uploadExistingResume } from "@/lib/api";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
@@ -72,7 +74,7 @@ export default function ProfilePage() {
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [activeTab, setActiveTab] = useState<
-    "personal" | "summary" | "skills" | "experience" | "education" | "projects" | "certifications"
+    "personal" | "summary" | "skills" | "experience" | "education" | "projects" | "certifications" | "awards" | "resume"
   >("personal");
 
   // User auth info
@@ -82,18 +84,24 @@ export default function ProfilePage() {
   // Profile State
   const [profile, setProfile] = useState<UserProfile>(defaultUserProfile);
 
+  // Hidden file inputs
+  const photoInputRef = useRef<HTMLInputElement | null>(null);
+  const resumeInputRef = useRef<HTMLInputElement | null>(null);
+
   // Skill input state
   const [newSkill, setNewSkill] = useState("");
 
-  // New item modal / form states
+  // Modals / Editing items
   const [editingExp, setEditingExp] = useState<UserProfileExperience | null>(null);
   const [editingEdu, setEditingEdu] = useState<UserProfileEducation | null>(null);
   const [editingProj, setEditingProj] = useState<UserProfileProject | null>(null);
   const [editingCert, setEditingCert] = useState<UserProfileCertification | null>(null);
+  const [editingAward, setEditingAward] = useState<UserProfileAward | null>(null);
 
-  // Resume creation state
+  // Actions states
   const [creatingResume, setCreatingResume] = useState(false);
   const [importingResume, setImportingResume] = useState(false);
+  const [uploadingResumeFile, setUploadingResumeFile] = useState(false);
   const [bannerMessage, setBannerMessage] = useState<string | null>(null);
 
   // ======================================================
@@ -131,7 +139,7 @@ export default function ProfilePage() {
         // Load profile from localStorage
         const storedProfile = getUserProfile(loadedUserId);
 
-        // Prepopulate with user details if brand new
+        // Prepopulate basic details if brand new
         if (!storedProfile.personal.fullName && loadedUserName) {
           storedProfile.personal.fullName = loadedUserName;
         }
@@ -161,7 +169,7 @@ export default function ProfilePage() {
     try {
       saveUserProfile(profile, userId);
 
-      // Also sync basic name to backend profile endpoint if token available
+      // Sync name to backend profile endpoint if token available
       const token = localStorage.getItem("access_token");
       if (token && profile.personal.fullName) {
         try {
@@ -188,6 +196,150 @@ export default function ProfilePage() {
     } finally {
       setSaving(false);
     }
+  }
+
+  // ======================================================
+  // AVATAR / PROFILE PHOTO UPLOAD
+  // ======================================================
+  function handlePhotoUpload(e: ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      alert("Please upload a valid image file (PNG, JPG, JPEG, WEBP).");
+      return;
+    }
+
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSize) {
+      alert("Image size should be less than 5MB.");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (uploadEvent) => {
+      const dataUrl = uploadEvent.target?.result as string;
+      if (dataUrl) {
+        const updated = {
+          ...profile,
+          avatarUrl: dataUrl,
+        };
+        setProfile(updated);
+        saveUserProfile(updated, userId);
+        setBannerMessage("Profile photo updated successfully!");
+        setTimeout(() => setBannerMessage(null), 4000);
+      }
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function handleRemovePhoto() {
+    const confirmed = window.confirm("Are you sure you want to remove your profile photo?");
+    if (!confirmed) return;
+
+    const updated = {
+      ...profile,
+      avatarUrl: "",
+    };
+    setProfile(updated);
+    saveUserProfile(updated, userId);
+    setBannerMessage("Profile photo removed.");
+    setTimeout(() => setBannerMessage(null), 3000);
+  }
+
+  // ======================================================
+  // RESUME FILE ATTACHMENT & PARSING (Naukri style)
+  // ======================================================
+  async function handleResumeFileUpload(e: ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const fileName = file.name.toLowerCase();
+    const isPdf = fileName.endsWith(".pdf");
+    const isDocx = fileName.endsWith(".docx");
+
+    if (!isPdf && !isDocx) {
+      alert("Please upload a PDF or DOCX resume file.");
+      return;
+    }
+
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    if (file.size > maxSize) {
+      alert("Resume file size must be less than 10MB.");
+      return;
+    }
+
+    setUploadingResumeFile(true);
+    try {
+      // 1. Read base64 for persistent local download & preview
+      const reader = new FileReader();
+      reader.onload = async (fileEvent) => {
+        const base64Url = fileEvent.target?.result as string;
+        const fileSizeStr =
+          file.size > 1024 * 1024
+            ? `${(file.size / (1024 * 1024)).toFixed(1)} MB`
+            : `${Math.round(file.size / 1024)} KB`;
+
+        const newResumeMeta = {
+          name: file.name,
+          size: fileSizeStr,
+          uploadedAt: new Date().toLocaleDateString("en-IN", {
+            day: "numeric",
+            month: "short",
+            year: "numeric",
+          }),
+          dataUrl: base64Url,
+        };
+
+        let updated: UserProfile = {
+          ...profile,
+          resumeFile: newResumeMeta,
+        };
+
+        // 2. Try parsing the file through backend resume parser to auto-fill profile details!
+        const token = localStorage.getItem("access_token");
+        if (token) {
+          try {
+            const parsed = await uploadExistingResume(token, file);
+            if (parsed && parsed.content) {
+              const resumeContent = JSON.parse(parsed.content);
+              updated = resumeDataToProfile(resumeContent, updated);
+              setBannerMessage(
+                `Resume "${file.name}" uploaded & parsed! Your skills, experience, and education were synchronized with your profile.`
+              );
+            }
+          } catch {
+            setBannerMessage(`Resume "${file.name}" attached successfully to your profile!`);
+          }
+        } else {
+          setBannerMessage(`Resume "${file.name}" attached successfully to your profile!`);
+        }
+
+        setProfile(updated);
+        saveUserProfile(updated, userId);
+        setUploadingResumeFile(false);
+        setTimeout(() => setBannerMessage(null), 6000);
+      };
+      reader.readAsDataURL(file);
+    } catch (err) {
+      console.error("Resume file attach error:", err);
+      alert("Could not process resume file.");
+      setUploadingResumeFile(false);
+    }
+  }
+
+  function handleRemoveResumeFile() {
+    const confirmed = window.confirm("Are you sure you want to remove your attached resume?");
+    if (!confirmed) return;
+
+    const updated = {
+      ...profile,
+      resumeFile: null,
+    };
+    setProfile(updated);
+    saveUserProfile(updated, userId);
+    setBannerMessage("Resume removed.");
+    setTimeout(() => setBannerMessage(null), 3000);
   }
 
   // ======================================================
@@ -287,6 +439,12 @@ export default function ProfilePage() {
   // Completeness score
   const completeness = calculateProfileCompleteness(profile);
 
+  const initialLetter = profile.personal.fullName
+    ? profile.personal.fullName[0].toUpperCase()
+    : userEmail
+    ? userEmail[0].toUpperCase()
+    : "P";
+
   if (loading) {
     return (
       <main className="min-h-screen bg-[var(--bg-base)] flex items-center justify-center p-6 text-[var(--text-muted)]">
@@ -300,6 +458,22 @@ export default function ProfilePage() {
 
   return (
     <main className="min-h-screen bg-[var(--bg-base)] px-4 py-6 sm:px-6 md:p-10 text-[var(--text-primary)]">
+      {/* Hidden File Inputs */}
+      <input
+        ref={photoInputRef}
+        type="file"
+        accept="image/*"
+        onChange={handlePhotoUpload}
+        className="hidden"
+      />
+      <input
+        ref={resumeInputRef}
+        type="file"
+        accept=".pdf,.docx"
+        onChange={handleResumeFileUpload}
+        className="hidden"
+      />
+
       <div className="mx-auto max-w-6xl space-y-8">
         {/* Navigation Breadcrumb */}
         <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[var(--border)] pb-5">
@@ -367,13 +541,53 @@ export default function ProfilePage() {
           <div className="absolute bottom-0 left-0 -ml-16 -mb-16 h-64 w-64 rounded-full bg-blue-500/10 blur-3xl pointer-events-none" />
 
           <div className="relative z-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-            {/* Left: Avatar & Basic Identity */}
+            {/* Left: Avatar with Image Upload Option & Identity */}
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
-              <div className="relative flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-tr from-indigo-600 to-blue-500 text-3xl font-extrabold uppercase text-white shadow-lg shadow-indigo-500/30">
-                {profile.personal.fullName ? profile.personal.fullName[0] : userEmail ? userEmail[0] : "U"}
-                <span className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-[var(--bg-surface)] p-0.5">
-                  <span className="h-full w-full rounded-full bg-emerald-500 animate-pulse" title="Active Candidate" />
-                </span>
+              {/* Photo Container */}
+              <div className="relative group shrink-0">
+                <div
+                  onClick={() => photoInputRef.current?.click()}
+                  className="relative flex h-24 w-24 cursor-pointer items-center justify-center rounded-2xl bg-gradient-to-tr from-indigo-600 to-blue-500 text-3xl font-extrabold uppercase text-white shadow-xl shadow-indigo-500/30 overflow-hidden border-2 border-indigo-400/40 hover:opacity-95 transition"
+                  title="Click to upload profile photo"
+                >
+                  {profile.avatarUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={profile.avatarUrl}
+                      alt={profile.personal.fullName || "User Avatar"}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <span>{initialLetter}</span>
+                  )}
+
+                  {/* Hover Overlay with Camera Icon */}
+                  <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-white">
+                    <span className="text-lg">📷</span>
+                    <span className="text-[10px] font-bold mt-0.5">Upload</span>
+                  </div>
+                </div>
+
+                {/* Remove photo link if photo present */}
+                {profile.avatarUrl ? (
+                  <button
+                    type="button"
+                    onClick={handleRemovePhoto}
+                    className="absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-red-600 text-[10px] font-bold text-white shadow hover:bg-red-500 transition"
+                    title="Remove Photo"
+                  >
+                    ×
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => photoInputRef.current?.click()}
+                    className="absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-indigo-600 border-2 border-[var(--bg-surface)] text-[11px] text-white shadow hover:bg-indigo-500 transition"
+                    title="Upload photo"
+                  >
+                    📷
+                  </button>
+                )}
               </div>
 
               <div className="space-y-1.5">
@@ -494,6 +708,70 @@ export default function ProfilePage() {
         </div>
 
         {/* ======================================================
+            NAUKRI-STYLE RESUME ATTACHMENT QUICK SECTION
+        ====================================================== */}
+        <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-5 shadow-sm">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-start sm:items-center gap-3">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-indigo-500/10 text-indigo-400 text-xl border border-indigo-500/20">
+                📄
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h3 className="text-sm font-bold text-[var(--text-primary)]">Attached Candidate Resume</h3>
+                  <span className="rounded-full bg-emerald-500/15 border border-emerald-500/25 px-2 py-0.2 text-[10px] font-semibold text-emerald-400">
+                    PDF / DOCX
+                  </span>
+                </div>
+                {profile.resumeFile ? (
+                  <p className="text-xs text-[var(--text-muted)] mt-0.5">
+                    <span className="font-semibold text-[var(--text-primary)]">{profile.resumeFile.name}</span> · {profile.resumeFile.size} · Uploaded on {profile.resumeFile.uploadedAt}
+                  </p>
+                ) : (
+                  <p className="text-xs text-[var(--text-muted)] mt-0.5">
+                    Upload your latest resume. Recruiters on Naukri and LinkedIn screen profiles with uploaded files 3x faster.
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2">
+              {profile.resumeFile?.dataUrl && (
+                <a
+                  href={profile.resumeFile.dataUrl}
+                  download={profile.resumeFile.name}
+                  className="rounded-xl border border-[var(--border)] bg-[var(--bg-muted)] hover:bg-[var(--bg-surface-elevated)] px-3.5 py-1.5 text-xs font-semibold text-[var(--text-primary)] transition flex items-center gap-1.5"
+                >
+                  <span>⬇️</span>
+                  <span>Download</span>
+                </a>
+              )}
+
+              <button
+                type="button"
+                onClick={() => resumeInputRef.current?.click()}
+                disabled={uploadingResumeFile}
+                className="rounded-xl bg-indigo-600 hover:bg-indigo-500 px-4 py-1.5 text-xs font-semibold text-white transition flex items-center gap-1.5 shadow-sm"
+              >
+                <span>{uploadingResumeFile ? "⏳" : "⬆️"}</span>
+                <span>{uploadingResumeFile ? "Uploading..." : profile.resumeFile ? "Replace Resume" : "Upload Resume File"}</span>
+              </button>
+
+              {profile.resumeFile && (
+                <button
+                  type="button"
+                  onClick={handleRemoveResumeFile}
+                  className="rounded-xl border border-red-500/30 bg-red-500/10 hover:bg-red-500/20 px-3 py-1.5 text-xs font-semibold text-red-400 transition"
+                  title="Remove attached resume"
+                >
+                  Delete
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* ======================================================
             NAVIGATION TABS (Naukri Section Tabs)
         ====================================================== */}
         <div className="flex items-center gap-2 overflow-x-auto pb-2 border-b border-[var(--border)] scrollbar-none">
@@ -505,6 +783,8 @@ export default function ProfilePage() {
             { id: "education", label: "Education", icon: "🎓", count: profile.education.length },
             { id: "projects", label: "Projects", icon: "🚀", count: profile.projects.length },
             { id: "certifications", label: "Certifications", icon: "🏆", count: profile.certifications.length },
+            { id: "awards", label: "Awards & Honors", icon: "🎖️", count: profile.awards?.length || 0 },
+            { id: "resume", label: "Resume File", icon: "📄", count: profile.resumeFile ? "1" : null },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -1295,7 +1575,7 @@ export default function ProfilePage() {
               <div>
                 <h3 className="text-base font-bold text-[var(--text-primary)]">Personal &amp; Professional Projects</h3>
                 <p className="text-xs text-[var(--text-muted)]">
-                  Add major software apps, portfolios, and client work.
+                  Add major software apps, open source contributions, and client solutions.
                 </p>
               </div>
 
@@ -1479,7 +1759,7 @@ export default function ProfilePage() {
               <div>
                 <h3 className="text-base font-bold text-[var(--text-primary)]">Certifications &amp; Licenses</h3>
                 <p className="text-xs text-[var(--text-muted)]">
-                  Add verified technical credentials (AWS, Google Cloud, Microsoft, Cisco, etc.).
+                  Add verified technical credentials (AWS, Google Cloud, Microsoft, Cisco, Coursera, etc.).
                 </p>
               </div>
 
@@ -1648,6 +1928,269 @@ export default function ProfilePage() {
                 </button>
               </div>
             </div>
+          </div>
+        )}
+
+        {/* ======================================================
+            TAB 8: AWARDS & ACHIEVEMENTS
+        ====================================================== */}
+        {activeTab === "awards" && (
+          <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-6 space-y-6 shadow-sm">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--border)] pb-3">
+              <div>
+                <h3 className="text-base font-bold text-[var(--text-primary)]">Awards, Honors &amp; Achievements</h3>
+                <p className="text-xs text-[var(--text-muted)]">
+                  Add hackathon wins, corporate honors, competitive programming ranks, and scholarships.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() =>
+                  setEditingAward({
+                    id: Math.random().toString(36).substring(2, 9),
+                    title: "",
+                    issuer: "",
+                    date: "",
+                    description: "",
+                  })
+                }
+                className="rounded-xl bg-indigo-600 px-4 py-2 text-xs font-semibold text-white hover:bg-indigo-500 transition"
+              >
+                + Add Award
+              </button>
+            </div>
+
+            {(!profile.awards || profile.awards.length === 0) ? (
+              <div className="rounded-xl border border-dashed border-[var(--border)] p-8 text-center text-xs text-[var(--text-muted)]">
+                No awards added yet. Click &quot;+ Add Award&quot; to showcase your hackathons, employee recognitions, and competitive honors.
+              </div>
+            ) : (
+              <div className="grid gap-4 md:grid-cols-2">
+                {profile.awards.map((award, index) => (
+                  <div
+                    key={award.id || index}
+                    className="rounded-xl border border-[var(--border)] bg-[var(--bg-base)] p-4 sm:p-5 flex flex-col justify-between"
+                  >
+                    <div>
+                      <div className="flex items-start justify-between gap-2">
+                        <h4 className="text-sm font-bold text-[var(--text-primary)]">{award.title || "Award Title"}</h4>
+                        <span className="text-base">🎖️</span>
+                      </div>
+                      <p className="text-xs font-semibold text-indigo-400 mt-0.5">{award.issuer || "Issuing Body / Event"}</p>
+                      {award.date && (
+                        <p className="text-[11px] text-[var(--text-muted)] mt-1">Conferred: {award.date}</p>
+                      )}
+                      {award.description && (
+                        <p className="text-xs text-[var(--text-secondary)] mt-2 leading-relaxed">
+                          {award.description}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="flex justify-end gap-2 pt-3 border-t border-[var(--border)] mt-3">
+                      <button
+                        type="button"
+                        onClick={() => setEditingAward(award)}
+                        className="rounded-lg bg-[var(--bg-muted)] border border-[var(--border)] px-2.5 py-1 text-xs font-medium text-[var(--text-primary)] hover:border-indigo-500/40"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const updated = {
+                            ...profile,
+                            awards: (profile.awards || []).filter((a) => a.id !== award.id),
+                          };
+                          setProfile(updated);
+                          saveUserProfile(updated, userId);
+                        }}
+                        className="rounded-lg bg-red-500/10 border border-red-500/20 px-2.5 py-1 text-xs font-medium text-red-400 hover:bg-red-500/20"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Modal for Award */}
+        {editingAward && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+            <div className="w-full max-w-lg rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-6 space-y-4 shadow-2xl">
+              <h3 className="text-base font-bold text-[var(--text-primary)]">
+                {(profile.awards || []).some((a) => a.id === editingAward.id) ? "Edit Award / Honor" : "Add Award / Honor"}
+              </h3>
+
+              <div className="space-y-3 text-left">
+                <div>
+                  <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1">Award / Honor Title</label>
+                  <input
+                    type="text"
+                    value={editingAward.title}
+                    onChange={(e) => setEditingAward({ ...editingAward, title: e.target.value })}
+                    placeholder="e.g. 1st Place – Smart India Hackathon or Employee of the Quarter"
+                    className="w-full rounded-xl border border-[var(--border)] bg-[var(--bg-base)] px-3 py-2 text-xs text-[var(--text-primary)] focus:border-indigo-500 focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1">Issuer / Organization / Event</label>
+                  <input
+                    type="text"
+                    value={editingAward.issuer}
+                    onChange={(e) => setEditingAward({ ...editingAward, issuer: e.target.value })}
+                    placeholder="e.g. Ministry of Education / Tech Mahindra / TCS"
+                    className="w-full rounded-xl border border-[var(--border)] bg-[var(--bg-base)] px-3 py-2 text-xs text-[var(--text-primary)] focus:border-indigo-500 focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1">Date / Year</label>
+                  <input
+                    type="text"
+                    value={editingAward.date}
+                    onChange={(e) => setEditingAward({ ...editingAward, date: e.target.value })}
+                    placeholder="e.g. Nov 2024"
+                    className="w-full rounded-xl border border-[var(--border)] bg-[var(--bg-base)] px-3 py-2 text-xs text-[var(--text-primary)] focus:border-indigo-500 focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1">Description / Summary of Achievement</label>
+                  <textarea
+                    rows={3}
+                    value={editingAward.description}
+                    onChange={(e) => setEditingAward({ ...editingAward, description: e.target.value })}
+                    placeholder="Awarded for creating an AI-driven solution among 500+ competing teams..."
+                    className="w-full rounded-xl border border-[var(--border)] bg-[var(--bg-base)] p-3 text-xs text-[var(--text-primary)] focus:border-indigo-500 focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setEditingAward(null)}
+                  className="rounded-xl border border-[var(--border)] px-4 py-2 text-xs font-medium text-[var(--text-muted)] hover:bg-[var(--bg-muted)]"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const currentAwards = profile.awards || [];
+                    const existingIndex = currentAwards.findIndex((a) => a.id === editingAward.id);
+                    let updatedList: UserProfileAward[];
+                    if (existingIndex >= 0) {
+                      updatedList = [...currentAwards];
+                      updatedList[existingIndex] = editingAward;
+                    } else {
+                      updatedList = [...currentAwards, editingAward];
+                    }
+                    const updated = { ...profile, awards: updatedList };
+                    setProfile(updated);
+                    saveUserProfile(updated, userId);
+                    setEditingAward(null);
+                  }}
+                  className="rounded-xl bg-indigo-600 px-5 py-2 text-xs font-semibold text-white hover:bg-indigo-500"
+                >
+                  Save Award
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ======================================================
+            TAB 9: RESUME UPLOAD SECTION (Dedicated View)
+        ====================================================== */}
+        {activeTab === "resume" && (
+          <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-6 space-y-6 shadow-sm">
+            <div className="border-b border-[var(--border)] pb-3">
+              <h3 className="text-base font-bold text-[var(--text-primary)]">Manage Attached Resume</h3>
+              <p className="text-xs text-[var(--text-muted)]">
+                Upload your official CV or resume document (PDF or DOCX). Keep it stored in your profile so you can download, replace, or use it for job applications at any time.
+              </p>
+            </div>
+
+            {profile.resumeFile ? (
+              <div className="rounded-2xl border border-indigo-500/30 bg-gradient-to-r from-indigo-950/20 to-[var(--bg-base)] p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-5">
+                <div className="flex items-center gap-4">
+                  <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-indigo-500/15 border border-indigo-500/30 text-3xl text-indigo-400">
+                    📄
+                  </div>
+                  <div>
+                    <span className="rounded-full bg-emerald-500/15 border border-emerald-500/30 px-2.5 py-0.5 text-[10px] font-bold text-emerald-400 uppercase">
+                      Active Resume
+                    </span>
+                    <h4 className="text-lg font-bold text-[var(--text-primary)] mt-1">
+                      {profile.resumeFile.name}
+                    </h4>
+                    <p className="text-xs text-[var(--text-muted)] mt-0.5">
+                      File Size: {profile.resumeFile.size} · Uploaded: {profile.resumeFile.uploadedAt}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-3">
+                  {profile.resumeFile.dataUrl && (
+                    <a
+                      href={profile.resumeFile.dataUrl}
+                      download={profile.resumeFile.name}
+                      className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] hover:bg-[var(--bg-surface-elevated)] px-4 py-2 text-xs font-semibold text-[var(--text-primary)] transition flex items-center gap-1.5 shadow-sm"
+                    >
+                      <span>⬇️</span>
+                      <span>Download Resume</span>
+                    </a>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={() => resumeInputRef.current?.click()}
+                    disabled={uploadingResumeFile}
+                    className="rounded-xl bg-indigo-600 hover:bg-indigo-500 px-4 py-2 text-xs font-semibold text-white transition flex items-center gap-1.5 shadow-sm"
+                  >
+                    <span>{uploadingResumeFile ? "⏳" : "⬆️"}</span>
+                    <span>{uploadingResumeFile ? "Uploading..." : "Replace Resume"}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleRemoveResumeFile}
+                    className="rounded-xl border border-red-500/30 bg-red-500/10 hover:bg-red-500/20 px-3.5 py-2 text-xs font-semibold text-red-400 transition"
+                  >
+                    Delete File
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div
+                onClick={() => resumeInputRef.current?.click()}
+                className="cursor-pointer rounded-2xl border-2 border-dashed border-[var(--border)] hover:border-indigo-500/60 bg-[var(--bg-base)] p-10 text-center transition group"
+              >
+                <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-500/10 text-indigo-400 text-2xl group-hover:scale-110 transition">
+                  ⬆️
+                </div>
+                <h4 className="mt-4 text-base font-bold text-[var(--text-primary)] group-hover:text-indigo-400 transition">
+                  {uploadingResumeFile ? "Uploading & Parsing Resume..." : "Click to Upload Your Resume"}
+                </h4>
+                <p className="mt-1 text-xs text-[var(--text-muted)] max-w-md mx-auto">
+                  Supported formats: PDF or DOCX (Max file size 10MB). When you upload, we can automatically extract your background into your profile!
+                </p>
+                <button
+                  type="button"
+                  disabled={uploadingResumeFile}
+                  className="mt-4 rounded-xl bg-indigo-600 px-5 py-2 text-xs font-semibold text-white shadow-md hover:bg-indigo-500 transition"
+                >
+                  {uploadingResumeFile ? "Processing..." : "Select Resume File"}
+                </button>
+              </div>
+            )}
           </div>
         )}
       </div>

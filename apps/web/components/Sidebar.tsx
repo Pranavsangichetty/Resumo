@@ -2,6 +2,7 @@
 
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { getUserProfile } from "@/lib/user-profile";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
@@ -34,6 +35,14 @@ export default function Sidebar({ mobileOpen = false, onCloseMobile }: SidebarPr
   const router = useRouter();
   const [collapsed, setCollapsed] = useState(false);
   const [user, setUser] = useState<UserInfo | null>(null);
+  const [avatarUrl, setAvatarUrl] = useState<string>("");
+
+  useEffect(() => {
+    const prof = getUserProfile();
+    if (prof.avatarUrl) {
+      setAvatarUrl(prof.avatarUrl);
+    }
+  }, [pathname]);
 
   useEffect(() => {
     const token = localStorage.getItem("access_token");
@@ -156,8 +165,13 @@ export default function Sidebar({ mobileOpen = false, onCloseMobile }: SidebarPr
               }`}
               title="Open My Profile"
             >
-              <div className="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-indigo-500/15 text-indigo-400 text-xs font-bold uppercase group-hover:scale-105 transition">
-                {user.name ? user.name[0] : user.email[0]}
+              <div className="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-indigo-500/15 text-indigo-400 text-xs font-bold uppercase group-hover:scale-105 transition overflow-hidden">
+                {avatarUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={avatarUrl} alt="Avatar" className="h-full w-full object-cover" />
+                ) : (
+                  user.name ? user.name[0] : user.email[0]
+                )}
                 <span className="absolute -bottom-0.5 -right-0.5 h-2 w-2 rounded-full bg-emerald-500 border border-[var(--bg-surface)]" />
               </div>
               {!collapsed && (
@@ -300,8 +314,13 @@ export default function Sidebar({ mobileOpen = false, onCloseMobile }: SidebarPr
                   }`}
                   title="Open My Profile"
                 >
-                  <div className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-indigo-500/15 text-indigo-400 text-xs font-bold uppercase">
-                    {user.name ? user.name[0] : user.email[0]}
+                  <div className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-indigo-500/15 text-indigo-400 text-xs font-bold uppercase overflow-hidden">
+                    {avatarUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={avatarUrl} alt="Avatar" className="h-full w-full object-cover" />
+                    ) : (
+                      user.name ? user.name[0] : user.email[0]
+                    )}
                     <span className="absolute -bottom-0.5 -right-0.5 h-2 w-2 rounded-full bg-emerald-500 border border-[var(--bg-surface)]" />
                   </div>
                   <div className="min-w-0 flex-1 text-left">
