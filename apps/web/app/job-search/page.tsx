@@ -788,17 +788,17 @@ export default function JobSearchPage() {
               </a>
             ))}
 
-            {/* Note: manual tracking for external portals */}
-            <div className="flex items-center gap-2 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 text-xs text-amber-300 shadow-sm">
-              <span className="font-bold text-amber-400 shrink-0">💡 Note:</span>
+            {/* Note placed directly after Glassdoor */}
+            <div className="inline-flex items-center gap-1.5 rounded-lg border border-amber-500/30 bg-amber-500/10 px-2.5 py-1.5 text-xs text-amber-300">
+              <span className="font-semibold text-amber-400">💡 Note:</span>
               <span>
-                Applying to multiple jobs through these portals? You can add and track your application status manually in the{" "}
+                Applying to multiple jobs? Add your status in{" "}
                 <button
                   type="button"
                   onClick={() => router.push("/applications")}
-                  className="font-bold underline underline-offset-2 hover:text-amber-100 transition inline-flex items-center gap-0.5 cursor-pointer"
+                  className="font-bold underline underline-offset-2 hover:text-amber-100 transition cursor-pointer"
                 >
-                  Application Module →
+                  Applications
                 </button>
               </span>
             </div>
