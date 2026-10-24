@@ -788,19 +788,18 @@ export default function JobSearchPage() {
               </a>
             ))}
 
-            {/* Reminder: external portal applications can't be detected */}
-            <div className="flex items-center gap-1.5 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 text-[11px] text-amber-300">
-              <span aria-hidden>ⓘ</span>
+            {/* Note: manual tracking for external portals */}
+            <div className="flex items-center gap-2 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 text-xs text-amber-300 shadow-sm">
+              <span className="font-bold text-amber-400 shrink-0">💡 Note:</span>
               <span>
-                Applying on these portals? We can&apos;t track them automatically —{" "}
+                Applying to multiple jobs through these portals? You can add and track your application status manually in the{" "}
                 <button
                   type="button"
                   onClick={() => router.push("/applications")}
-                  className="font-semibold underline underline-offset-2 hover:text-amber-200"
+                  className="font-bold underline underline-offset-2 hover:text-amber-100 transition inline-flex items-center gap-0.5 cursor-pointer"
                 >
-                  add them to Applications
-                </button>{" "}
-                to keep your status updated.
+                  Application Module →
+                </button>
               </span>
             </div>
           </div>
