@@ -14,6 +14,7 @@ import {
   SAMPLE_RESUME_TITLE,
 } from "@/lib/sample-resume";
 import { emptyResumeData } from "@/lib/resume-types";
+import { getUserProfile, profileToResumeData } from "@/lib/user-profile";
 import TemplateRenderer from "@/components/template/TemplateRenderer";
 import { ResumeTemplate } from "@/lib/template-types";
 

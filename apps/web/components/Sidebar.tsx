@@ -144,16 +144,25 @@ export default function Sidebar({ mobileOpen = false, onCloseMobile }: SidebarPr
           </button>
         </div>
 
-        {/* User + Logout */}
+        {/* User Profile + Logout */}
         {user && (
-          <div className="px-3 py-3">
-            <div className="flex items-center gap-2.5">
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-indigo-500/15 text-indigo-400 text-xs font-bold uppercase">
+          <div className="px-3 py-3 border-t border-[var(--border)]">
+            <div
+              onClick={() => router.push("/profile")}
+              className={`flex items-center gap-2.5 rounded-xl p-1.5 transition cursor-pointer group ${
+                pathname === "/profile"
+                  ? "bg-indigo-500/15 text-indigo-400 border border-indigo-500/30"
+                  : "hover:bg-[var(--bg-surface-elevated)] border border-transparent"
+              }`}
+              title="Open My Profile"
+            >
+              <div className="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-indigo-500/15 text-indigo-400 text-xs font-bold uppercase group-hover:scale-105 transition">
                 {user.name ? user.name[0] : user.email[0]}
+                <span className="absolute -bottom-0.5 -right-0.5 h-2 w-2 rounded-full bg-emerald-500 border border-[var(--bg-surface)]" />
               </div>
               {!collapsed && (
-                <div className="min-w-0 flex-1">
-                  <p className="text-[13px] font-semibold text-[var(--text-primary)] truncate">
+                <div className="min-w-0 flex-1 text-left">
+                  <p className="text-[13px] font-semibold text-[var(--text-primary)] group-hover:text-indigo-400 transition truncate">
                     {user.name || "User"}
                   </p>
                   <p className="text-[10px] text-[var(--text-muted)] truncate">
@@ -162,7 +171,11 @@ export default function Sidebar({ mobileOpen = false, onCloseMobile }: SidebarPr
                 </div>
               )}
               <button
-                onClick={handleLogout}
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleLogout();
+                }}
                 className="shrink-0 rounded-md p-1.5 text-[var(--text-muted)] hover:bg-red-500/10 hover:text-red-400 transition"
                 title="Logout"
               >
@@ -275,11 +288,23 @@ export default function Sidebar({ mobileOpen = false, onCloseMobile }: SidebarPr
             {/* User + Logout */}
             {user && (
               <div className="border-t border-[var(--border)] px-4 py-3 bg-[var(--bg-muted)]/40">
-                <div className="flex items-center gap-2.5">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-indigo-500/15 text-indigo-400 text-xs font-bold uppercase">
+                <div
+                  onClick={() => {
+                    onCloseMobile?.();
+                    router.push("/profile");
+                  }}
+                  className={`flex items-center gap-2.5 rounded-xl p-2 cursor-pointer transition ${
+                    pathname === "/profile"
+                      ? "bg-indigo-500/15 border border-indigo-500/30 text-indigo-400"
+                      : "hover:bg-[var(--bg-surface-elevated)]"
+                  }`}
+                  title="Open My Profile"
+                >
+                  <div className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-indigo-500/15 text-indigo-400 text-xs font-bold uppercase">
                     {user.name ? user.name[0] : user.email[0]}
+                    <span className="absolute -bottom-0.5 -right-0.5 h-2 w-2 rounded-full bg-emerald-500 border border-[var(--bg-surface)]" />
                   </div>
-                  <div className="min-w-0 flex-1">
+                  <div className="min-w-0 flex-1 text-left">
                     <p className="text-xs font-semibold text-[var(--text-primary)] truncate">
                       {user.name || "User"}
                     </p>
@@ -289,7 +314,10 @@ export default function Sidebar({ mobileOpen = false, onCloseMobile }: SidebarPr
                   </div>
                   <button
                     type="button"
-                    onClick={handleLogout}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleLogout();
+                    }}
                     className="shrink-0 rounded-lg p-2 text-[var(--text-muted)] hover:bg-red-500/10 hover:text-red-400 transition"
                     title="Logout"
                   >

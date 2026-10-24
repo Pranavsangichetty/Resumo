@@ -17,6 +17,7 @@ const ROUTE_NAMES: Record<string, string> = {
   "/applications": "Applications",
   "/mock-interview": "Mock Interview",
   "/analytics": "Analytics",
+  "/profile": "Candidate Profile",
   "/help": "Help & Support",
   "/settings": "Settings",
 };

@@ -199,6 +199,16 @@ export default function Dashboard() {
               Signed in as <span className="text-[var(--accent-light)] font-medium">{user.name ? `${user.name} (${user.email})` : user.email}</span>
             </p>
           </div>
+
+          <button
+            type="button"
+            onClick={() => router.push("/profile")}
+            className="self-start sm:self-center inline-flex items-center gap-2 rounded-xl border border-indigo-500/30 bg-indigo-500/10 hover:bg-indigo-500/20 px-4 py-2 text-xs font-semibold text-indigo-400 transition shadow-sm"
+            title="Open and edit your central candidate profile (Naukri / LinkedIn style)"
+          >
+            <span>👤</span>
+            <span>Candidate Profile &amp; Autofill →</span>
+          </button>
         </div>
 
         {/* ==================================================

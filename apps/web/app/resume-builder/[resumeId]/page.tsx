@@ -3,6 +3,7 @@
 import TemplateRenderer from "@/components/template/TemplateRenderer";
 import PrintResumeButton from "@/components/template/PrintResumeButton";
 import TemplateSelector from "@/components/template/TemplateSelector";
+import { getUserProfile, profileToResumeData } from "@/lib/user-profile";
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
@@ -467,6 +468,48 @@ export default function ResumeEditorPage() {
       setTitle(SAMPLE_RESUME_TITLE);
     }
     setSuccess("Loaded ATS-optimized sample resume! Customize any section as you want.");
+    setError("");
+  }
+
+  
+  function handleAutofillFromProfile() {
+    const profile = getUserProfile();
+    const hasProfileData =
+      Boolean(profile.personal.fullName?.trim()) ||
+      Boolean(profile.personal.email?.trim()) ||
+      profile.experiences.length > 0 ||
+      profile.skills.length > 0 ||
+      profile.education.length > 0;
+
+    if (!hasProfileData) {
+      const goToProfile = window.confirm(
+        "No details found in your User Profile yet.\n\nWould you like to open your Profile now to add your personal details, experience, and skills?"
+      );
+      if (goToProfile) {
+        router.push("/profile");
+      }
+      return;
+    }
+
+    const hasExistingData =
+      Boolean(resumeData.personal.fullName?.trim()) ||
+      resumeData.experiences.length > 0 ||
+      resumeData.skills.length > 0;
+
+    if (hasExistingData) {
+      const confirmed = window.confirm(
+        "Autofilling will populate your resume with your saved Profile details. Continue?"
+      );
+      if (!confirmed) return;
+    }
+
+    const filled = profileToResumeData(profile);
+    setResumeData(filled);
+    setSkillsInput((filled.skills || []).join(", "));
+    if (!title || title === "Untitled Resume") {
+      setTitle(profile.personal.fullName ? `${profile.personal.fullName}'s Resume` : "My Resume");
+    }
+    setSuccess("✓ Autofilled your resume with your personal profile details!");
     setError("");
   }
 
@@ -1153,6 +1196,18 @@ export default function ResumeEditorPage() {
               <span className="text-[10px] opacity-75">{showAtsDetails ? "▲" : "▼"}</span>
             </button>
 
+            
+            {/* Autofill from Profile Button */}
+            <button
+              type="button"
+              onClick={handleAutofillFromProfile}
+              className="flex items-center gap-1.5 rounded-xl border border-indigo-500/40 bg-indigo-500/10 px-3.5 py-2 text-xs font-semibold text-indigo-400 transition hover:bg-indigo-500/20 hover:text-indigo-300"
+              title="Autofill this resume with your saved User Profile details"
+            >
+              <span>✨</span>
+              <span>Autofill from Profile</span>
+            </button>
+
             {/* Load Sample Resume Button */}
             <button
               type="button"
@@ -1264,13 +1319,25 @@ export default function ResumeEditorPage() {
                       Load our complete ATS-friendly sample resume (Alex Morgan · Senior Engineer). It comes with structured experience, bullet points, metrics, and skills that you can freely edit as you want!
                     </p>
                   </div>
-                  <button
-                    type="button"
-                    onClick={handleLoadSampleData}
-                    className="shrink-0 rounded-xl bg-blue-600 px-4 py-2 text-xs font-semibold text-white shadow hover:bg-blue-500 transition"
-                  >
-                    ⚡ Load Sample Resume
-                  </button>
+                  
+                  <div className="flex flex-wrap gap-2 shrink-0">
+                    <button
+                      type="button"
+                      onClick={handleAutofillFromProfile}
+                      className="rounded-xl bg-indigo-600 px-3.5 py-2 text-xs font-semibold text-white shadow hover:bg-indigo-500 transition flex items-center gap-1"
+                    >
+                      <span>✨</span>
+                      <span>Autofill from My Profile</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleLoadSampleData}
+                      className="rounded-xl border border-blue-500/40 bg-blue-500/10 px-3.5 py-2 text-xs font-semibold text-blue-400 hover:bg-blue-500/20 transition flex items-center gap-1"
+                    >
+                      <span>⚡</span>
+                      <span>Sample Resume</span>
+                    </button>
+                  </div>
                 </div>
               </div>
             )}
@@ -1291,6 +1358,24 @@ export default function ResumeEditorPage() {
             {/* PERSONAL DETAILS */}
 
             <EditorSection title="Personal Details">
+
+              {/* Profile Autofill Helper */}
+              <div className="mb-4 flex flex-wrap items-center justify-between gap-2.5 rounded-xl border border-indigo-500/30 bg-indigo-500/10 p-3">
+                <div className="flex items-center gap-2">
+                  <span className="text-base">👤</span>
+                  <p className="text-xs text-[var(--text-secondary)]">
+                    Save time by autofilling your contact info &amp; history from your Profile.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleAutofillFromProfile}
+                  className="rounded-lg bg-indigo-600 hover:bg-indigo-500 px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition"
+                >
+                  ⚡ Autofill with Personal Details
+                </button>
+              </div>
+
 
               <div className="grid gap-4 md:grid-cols-2">
 
