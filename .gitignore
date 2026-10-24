@@ -26,6 +26,7 @@ __pycache__/
 # Backups & Logs
 *.log
 *.backup
+*.zip
 .DS_Store
 Thumbs.db
 
