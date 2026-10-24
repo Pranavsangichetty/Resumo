@@ -790,7 +790,7 @@ export default function JobSearchPage() {
 
             {/* Note placed directly after Glassdoor */}
             <div className="inline-flex items-center gap-1.5 rounded-lg border border-amber-500/30 bg-amber-500/10 px-2.5 py-1.5 text-xs text-amber-300">
-              <span className="font-semibold text-amber-400">💡 Note:</span>
+              <span className="font-semibold text-amber-400">Note:</span>
               <span>
                 Applying to multiple jobs? Add your status in{" "}
                 <button
@@ -932,11 +932,10 @@ export default function JobSearchPage() {
                         target="_blank"
                         rel="noopener noreferrer"
                         onClick={() => handleApplyClick(job)}
-                        className="rounded-xl bg-emerald-600 px-3.5 py-1.5 text-xs font-semibold text-white hover:bg-emerald-500 transition shadow-sm inline-flex items-center gap-1"
+                        className="rounded-xl bg-emerald-600 px-3.5 py-1.5 text-xs font-semibold text-white hover:bg-emerald-500 transition shadow-sm inline-flex items-center"
                         title={`Apply directly to ${job.title} at ${job.company}`}
                       >
                         <span>Apply</span>
-                        <span className="text-[11px]">↗</span>
                       </a>
                       {/* ATS Score */}
                       <button
