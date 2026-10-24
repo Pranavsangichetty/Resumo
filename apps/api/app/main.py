@@ -4,6 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
+from app.api.routes.analytics import router as analytics_router
 from app.api.routes.applications import router as applications_router
 from app.api.routes.auth import router as auth_router
 from app.api.routes.cover_letter import router as cover_letter_router
@@ -92,6 +93,12 @@ app.include_router(
 # Job Applications Tracker
 app.include_router(
     applications_router,
+    prefix="/api/v1",
+)
+
+# Analytics
+app.include_router(
+    analytics_router,
     prefix="/api/v1",
 )
 

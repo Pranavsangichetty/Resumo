@@ -20,6 +20,23 @@ interface Job {
   source: string;
 }
 
+interface TrackedApp {
+  id: number;
+  company: string;
+  position: string;
+  status: string;
+  job_url?: string | null;
+}
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL?.replace(/\/+$/, "") || "http://localhost:8000";
+const PENDING_APPLY_KEY = "resumo_pending_apply";
+// Ignore tab switches shorter than this (e.g. accidental clicks).
+const MIN_AWAY_MS = 3000;
+
+function trackKey(company: string, position: string) {
+  return `${company.trim().toLowerCase()}|${position.trim().toLowerCase()}`;
+}
+
 // ─── Location data ────────────────────────────────────────────────────────────
 const INDIA_CITIES = [
   "Bengaluru", "Mumbai", "Hyderabad", "Pune", "Chennai", "Delhi", "Noida",
@@ -587,6 +604,135 @@ export default function JobSearchPage() {
     fetchJobs(next, false);
   }
 
+  // ── application tracking ──
+  const [tracked, setTracked] = useState<Record<string, TrackedApp>>({});
+  const [savingKey, setSavingKey] = useState<string | null>(null);
+  const [applyPrompt, setApplyPrompt] = useState<Job | null>(null);
+  const [toast, setToast] = useState<{ text: string; error?: boolean } | null>(null);
+
+  const showToast = useCallback((text: string, error = false) => {
+    setToast({ text, error });
+    window.setTimeout(() => setToast(null), 3500);
+  }, []);
+
+  const authHeaders = useCallback((): Record<string, string> | null => {
+    const token = localStorage.getItem("access_token");
+    if (!token) return null;
+    return {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+      "bypass-tunnel-reminder": "true",
+    };
+  }, []);
+
+  // Load existing applications so cards show "Applied" / "Saved" badges.
+  useEffect(() => {
+    const headers = authHeaders();
+    if (!headers) return;
+    fetch(`${API_URL}/api/v1/applications`, { headers })
+      .then((r) => (r.ok ? r.json() : []))
+      .then((list: TrackedApp[]) => {
+        const map: Record<string, TrackedApp> = {};
+        list.forEach((a) => { map[trackKey(a.company, a.position)] = a; });
+        setTracked(map);
+      })
+      .catch(() => { /* badges are optional */ });
+  }, [authHeaders]);
+
+  async function saveJob(job: Job, status: "Saved" | "Applied") {
+    const headers = authHeaders();
+    if (!headers) {
+      router.push("/login");
+      return;
+    }
+    const key = trackKey(job.company, job.title);
+    const existing = tracked[key];
+    // Never downgrade an application that's already further along.
+    if (existing && (existing.status === status || status === "Saved")) {
+      showToast(`Already in Applications as "${existing.status}".`);
+      return;
+    }
+
+    setSavingKey(key);
+    try {
+      const res = existing
+        ? await fetch(`${API_URL}/api/v1/applications/${existing.id}`, {
+            method: "PATCH",
+            headers,
+            body: JSON.stringify({
+              status,
+              ...(status === "Applied" ? { applied_date: new Date().toISOString().split("T")[0] } : {}),
+            }),
+          })
+        : await fetch(`${API_URL}/api/v1/applications`, {
+            method: "POST",
+            headers,
+            body: JSON.stringify({
+              company: job.company,
+              position: job.title,
+              location: job.location || null,
+              status,
+              salary: job.salary || null,
+              applied_date: status === "Applied" ? new Date().toISOString().split("T")[0] : null,
+              job_url: getApplyUrl(job),
+              notes: "Added from Resumo Job Search",
+            }),
+          });
+
+      if (res.status === 401) {
+        localStorage.removeItem("access_token");
+        router.push("/login");
+        return;
+      }
+      if (!res.ok) throw new Error(String(res.status));
+      const saved: TrackedApp = await res.json();
+      setTracked((prev) => ({ ...prev, [key]: saved }));
+      showToast(status === "Applied" ? `Marked as applied: ${job.title}` : `Saved to Applications: ${job.title}`);
+    } catch {
+      showToast("Couldn't save to Applications. Please try again.", true);
+    } finally {
+      setSavingKey(null);
+    }
+  }
+
+  // Remember which job the user went to apply for.
+  function handleApplyClick(job: Job) {
+    try {
+      sessionStorage.setItem(PENDING_APPLY_KEY, JSON.stringify({ job, ts: Date.now() }));
+    } catch { /* storage unavailable */ }
+  }
+
+  // When the user comes back to this tab, ask whether they applied.
+  useEffect(() => {
+    function checkPending() {
+      if (document.visibilityState !== "visible") return;
+      const raw = sessionStorage.getItem(PENDING_APPLY_KEY);
+      if (!raw) return;
+      try {
+        const { job, ts } = JSON.parse(raw) as { job: Job; ts: number };
+        if (Date.now() - ts < MIN_AWAY_MS) return;
+        sessionStorage.removeItem(PENDING_APPLY_KEY);
+        setApplyPrompt(job);
+      } catch {
+        sessionStorage.removeItem(PENDING_APPLY_KEY);
+      }
+    }
+    checkPending();
+    document.addEventListener("visibilitychange", checkPending);
+    window.addEventListener("focus", checkPending);
+    return () => {
+      document.removeEventListener("visibilitychange", checkPending);
+      window.removeEventListener("focus", checkPending);
+    };
+  }, []);
+
+  async function answerPrompt(answer: "applied" | "later" | "no") {
+    const job = applyPrompt;
+    setApplyPrompt(null);
+    if (!job || answer === "no") return;
+    await saveJob(job, answer === "applied" ? "Applied" : "Saved");
+  }
+
   return (
     <main className="min-h-screen bg-[var(--bg-base)] px-4 py-6 sm:px-6 md:p-10 text-[var(--text-primary)]">
       <div className="mx-auto max-w-6xl">
@@ -641,6 +787,22 @@ export default function JobSearchPage() {
                 {portal.name}
               </a>
             ))}
+
+            {/* Reminder: external portal applications can't be detected */}
+            <div className="flex items-center gap-1.5 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 text-[11px] text-amber-300">
+              <span aria-hidden>ⓘ</span>
+              <span>
+                Applying on these portals? We can&apos;t track them automatically —{" "}
+                <button
+                  type="button"
+                  onClick={() => router.push("/applications")}
+                  className="font-semibold underline underline-offset-2 hover:text-amber-200"
+                >
+                  add them to Applications
+                </button>{" "}
+                to keep your status updated.
+              </span>
+            </div>
           </div>
         </div>
 
@@ -720,6 +882,7 @@ export default function JobSearchPage() {
                       href={getApplyUrl(job)}
                       target="_blank"
                       rel="noopener noreferrer"
+                      onClick={() => handleApplyClick(job)}
                       className="text-base font-bold text-[var(--text-primary)] hover:text-blue-400 transition inline-flex items-center gap-1.5"
                       title={`Apply directly to ${job.title} at ${job.company}`}
                     >
@@ -769,6 +932,7 @@ export default function JobSearchPage() {
                         href={getApplyUrl(job)}
                         target="_blank"
                         rel="noopener noreferrer"
+                        onClick={() => handleApplyClick(job)}
                         className="rounded-xl bg-emerald-600 px-3.5 py-1.5 text-xs font-semibold text-white hover:bg-emerald-500 transition shadow-sm inline-flex items-center gap-1"
                         title={`Apply directly to ${job.title} at ${job.company}`}
                       >
@@ -783,10 +947,27 @@ export default function JobSearchPage() {
                         Match ATS →
                       </button>
                       {/* Track */}
-                      <button onClick={() => router.push("/applications")}
-                        className="rounded-xl border border-[var(--border)] bg-[var(--bg-muted)] px-3 py-1.5 text-xs font-medium text-[var(--text-primary)] hover:bg-[var(--bg-base)] transition">
-                        Track
-                      </button>
+                      {(() => {
+                        const key = trackKey(job.company, job.title);
+                        const t = tracked[key];
+                        if (t) {
+                          return (
+                            <button onClick={() => router.push("/applications")}
+                              title="View in Applications"
+                              className="rounded-xl border border-emerald-500/40 bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold text-emerald-400 hover:bg-emerald-500/20 transition">
+                              ✓ {t.status}
+                            </button>
+                          );
+                        }
+                        return (
+                          <button onClick={() => saveJob(job, "Saved")}
+                            disabled={savingKey === key}
+                            title="Save this job to your Applications tracker"
+                            className="rounded-xl border border-[var(--border)] bg-[var(--bg-muted)] px-3 py-1.5 text-xs font-medium text-[var(--text-primary)] hover:bg-[var(--bg-base)] transition disabled:opacity-60">
+                            {savingKey === key ? "Saving…" : "Track"}
+                          </button>
+                        );
+                      })()}
                     </div>
                   </div>
                 </div>
@@ -818,6 +999,44 @@ export default function JobSearchPage() {
           )}
         </div>
       </div>
+
+      {/* ── "Did you apply?" prompt ── */}
+      {applyPrompt && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+          <div className="w-full max-w-md rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-6 shadow-2xl">
+            <h2 className="text-lg font-bold mb-1">Did you apply?</h2>
+            <p className="text-sm text-[var(--text-muted)] mb-5">
+              <span className="font-semibold text-[var(--text-primary)]">{applyPrompt.title}</span> at{" "}
+              <span className="font-semibold text-blue-400">{applyPrompt.company}</span>
+            </p>
+            <div className="flex flex-col gap-2">
+              <button onClick={() => answerPrompt("applied")}
+                className="rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-500 transition">
+                Yes, I applied
+              </button>
+              <button onClick={() => answerPrompt("later")}
+                className="rounded-xl border border-[var(--border)] bg-[var(--bg-muted)] px-4 py-2.5 text-sm font-medium hover:bg-[var(--bg-base)] transition">
+                Not yet — save for later
+              </button>
+              <button onClick={() => answerPrompt("no")}
+                className="rounded-xl px-4 py-2 text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)] transition">
+                Not interested
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Toast ── */}
+      {toast && (
+        <div className={`fixed bottom-6 left-1/2 -translate-x-1/2 z-50 rounded-xl px-4 py-2.5 text-sm shadow-lg border ${
+          toast.error
+            ? "border-rose-500/40 bg-rose-950 text-rose-200"
+            : "border-emerald-500/40 bg-emerald-950 text-emerald-200"
+        }`}>
+          {toast.text}
+        </div>
+      )}
     </main>
   );
 }

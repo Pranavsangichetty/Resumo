@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 
 from app.api.dependencies import get_current_user
 from app.db.session import get_db
+from app.models.ats_evaluation import ATSEvaluation
 from app.models.user import User
 
 from app.schemas.resume import ResumeResponse
@@ -60,5 +61,27 @@ def evaluate_resume_for_job(
         resume=resume,
         job_description=request.job_description,
     )
+
+    # --------------------------------------------------
+    # Persist result for analytics (never block the response)
+    # --------------------------------------------------
+
+    try:
+        db.add(
+            ATSEvaluation(
+                user_id=current_user.id,
+                resume_id=resume.id,
+                score=int(result["score"]),
+                keyword_match=int(result["keyword_match"]),
+                skills_match=int(result["skills_match"]),
+                experience_match=int(result["experience_match"]),
+                education_match=int(result["education_match"]),
+                matched_keywords=list(result.get("matched_keywords") or []),
+                missing_keywords=list(result.get("missing_keywords") or []),
+            )
+        )
+        db.commit()
+    except Exception:
+        db.rollback()
 
     return result

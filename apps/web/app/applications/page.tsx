@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const API_URL = process.env.NEXT_PUBLIC_API_URL?.replace(/\/+$/, "") || "http://localhost:8000";
 
 interface ApplicationItem {
   id: number;
@@ -18,6 +18,26 @@ interface ApplicationItem {
 }
 
 const STATUS_LIST = ["Saved", "Applied", "Interviewing", "Offer", "Rejected"];
+
+// Map any stored status (e.g. "applied", "Interview") onto a board column so no card disappears.
+function normalizeStatus(raw: string | undefined): string {
+  const s = (raw || "").trim().toLowerCase();
+  const match = STATUS_LIST.find((x) => x.toLowerCase() === s);
+  if (match) return match;
+  if (s.startsWith("interview")) return "Interviewing";
+  return "Applied";
+}
+
+async function errorMessage(res: Response, fallback: string): Promise<string> {
+  try {
+    const body = await res.json();
+    if (typeof body?.detail === "string") return body.detail;
+    if (Array.isArray(body?.detail)) return body.detail.map((d: { msg?: string }) => d.msg).join(", ");
+  } catch {
+    /* non-JSON body */
+  }
+  return `${fallback} (${res.status})`;
+}
 
 export default function ApplicationsPage() {
   const router = useRouter();
@@ -38,6 +58,15 @@ export default function ApplicationsPage() {
   const [jobUrl, setJobUrl] = useState("");
   const [notes, setNotes] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
+  const [formError, setFormError] = useState("");
+
+  function handleUnauthorized(res: Response): boolean {
+    if (res.status !== 401) return false;
+    localStorage.removeItem("access_token");
+    router.replace("/login");
+    return true;
+  }
 
   useEffect(() => {
     loadApplications();
@@ -57,12 +86,17 @@ export default function ApplicationsPage() {
           "bypass-tunnel-reminder": "true",
         },
       });
-      if (res.ok) {
-        const list = await res.json();
-        setApplications(list);
+      if (handleUnauthorized(res)) return;
+      if (!res.ok) {
+        setError(await errorMessage(res, "Could not load applications"));
+        return;
       }
+      const list: ApplicationItem[] = await res.json();
+      setApplications(list.map((a) => ({ ...a, status: normalizeStatus(a.status) })));
+      setError("");
     } catch (err) {
       console.error(err);
+      setError("Could not reach the server. Check that the API is running and try again.");
     } finally {
       setLoading(false);
     }
@@ -74,6 +108,8 @@ export default function ApplicationsPage() {
     if (!token) return;
 
     setSubmitting(true);
+    setFormError("");
+    const optional = (v: string) => (v.trim() ? v.trim() : null);
     try {
       const res = await fetch(`${API_URL}/api/v1/applications`, {
         method: "POST",
@@ -83,18 +119,21 @@ export default function ApplicationsPage() {
           "bypass-tunnel-reminder": "true",
         },
         body: JSON.stringify({
-          company,
-          position,
-          location,
+          company: company.trim(),
+          position: position.trim(),
+          location: optional(location),
           status,
-          salary,
-          applied_date: appliedDate,
-          job_url: jobUrl,
-          notes,
+          salary: optional(salary),
+          applied_date: optional(appliedDate),
+          job_url: optional(jobUrl),
+          notes: optional(notes),
         }),
       });
 
-      if (res.ok) {
+      if (handleUnauthorized(res)) return;
+      if (!res.ok) {
+        setFormError(await errorMessage(res, "Could not save application"));
+      } else {
         setShowModal(false);
         setCompany("");
         setPosition("");
@@ -102,10 +141,12 @@ export default function ApplicationsPage() {
         setSalary("");
         setJobUrl("");
         setNotes("");
+        setStatus("Applied");
         await loadApplications();
       }
     } catch (err) {
       console.error(err);
+      setFormError("Could not reach the server. Please try again.");
     } finally {
       setSubmitting(false);
     }
@@ -125,13 +166,16 @@ export default function ApplicationsPage() {
         },
         body: JSON.stringify({ status: newStatus }),
       });
+      if (handleUnauthorized(res)) return;
       if (res.ok) {
-        setApplications(
-          applications.map((a) => (a.id === id ? { ...a, status: newStatus } : a))
-        );
+        setApplications((prev) => prev.map((a) => (a.id === id ? { ...a, status: newStatus } : a)));
+        setError("");
+      } else {
+        setError(await errorMessage(res, "Could not update status"));
       }
     } catch (err) {
       console.error(err);
+      setError("Could not reach the server. Status was not changed.");
     }
   }
 
@@ -148,11 +192,16 @@ export default function ApplicationsPage() {
           "bypass-tunnel-reminder": "true",
         },
       });
-      if (res.ok || res.status === 204) {
-        setApplications(applications.filter((a) => a.id !== id));
+      if (handleUnauthorized(res)) return;
+      if (res.ok) {
+        setApplications((prev) => prev.filter((a) => a.id !== id));
+        setError("");
+      } else {
+        setError(await errorMessage(res, "Could not delete application"));
       }
     } catch (err) {
       console.error(err);
+      setError("Could not reach the server. Application was not deleted.");
     }
   }
 
@@ -182,6 +231,21 @@ export default function ApplicationsPage() {
             ＋ Add Application
           </button>
         </div>
+
+        {error && (
+          <div className="mb-6 flex items-center justify-between gap-4 rounded-xl border border-rose-500/40 bg-rose-500/10 p-4 text-sm text-rose-300">
+            <span>{error}</span>
+            <button
+              onClick={() => {
+                setLoading(true);
+                loadApplications();
+              }}
+              className="shrink-0 rounded-lg border border-rose-400/40 px-3 py-1 text-xs hover:bg-rose-500/20"
+            >
+              Retry
+            </button>
+          </div>
+        )}
 
         {/* Kanban Columns */}
         <div className="grid gap-4 md:grid-cols-5">
@@ -227,6 +291,25 @@ export default function ApplicationsPage() {
                         <p className="text-xs text-emerald-400 font-medium">💰 {app.salary}</p>
                       )}
 
+                      {app.applied_date && (
+                        <p className="text-xs text-[var(--text-muted)]">📅 {app.applied_date}</p>
+                      )}
+
+                      {app.notes && (
+                        <p className="text-xs text-[var(--text-muted)] line-clamp-3 whitespace-pre-line">{app.notes}</p>
+                      )}
+
+                      {app.job_url && /^https?:\/\//i.test(app.job_url) && (
+                        <a
+                          href={app.job_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="block text-xs text-blue-400 hover:underline truncate"
+                        >
+                          View posting ↗
+                        </a>
+                      )}
+
                       <div className="pt-2 border-t border-[var(--border)] flex items-center justify-between">
                         <select
                           value={app.status}
@@ -243,7 +326,11 @@ export default function ApplicationsPage() {
                     </div>
                   ))}
 
-                  {colApps.length === 0 && (
+                  {loading && colApps.length === 0 && (
+                    <p className="text-center text-xs text-[var(--text-muted)] py-6">Loading…</p>
+                  )}
+
+                  {!loading && colApps.length === 0 && (
                     <p className="text-center text-xs text-[var(--text-muted)] py-6">
                       No jobs in {colStatus.toLowerCase()}
                     </p>
@@ -261,7 +348,10 @@ export default function ApplicationsPage() {
               <div className="flex items-center justify-between pb-4 border-b border-[var(--border)] mb-4">
                 <h2 className="text-lg font-bold">Add Job Application</h2>
                 <button
-                  onClick={() => setShowModal(false)}
+                  onClick={() => {
+                    setShowModal(false);
+                    setFormError("");
+                  }}
                   className="text-[var(--text-muted)] hover:text-white"
                 >
                   ✕
@@ -269,6 +359,11 @@ export default function ApplicationsPage() {
               </div>
 
               <form onSubmit={handleCreate} className="space-y-4">
+                {formError && (
+                  <div className="rounded-lg border border-rose-500/40 bg-rose-500/10 p-3 text-xs text-rose-300">
+                    {formError}
+                  </div>
+                )}
                 <div className="grid gap-4 md:grid-cols-2">
                   <div>
                     <label className="block text-xs font-medium text-[var(--text-muted)] mb-1">
@@ -392,7 +487,7 @@ export default function ApplicationsPage() {
                   <button
                     type="submit"
                     disabled={submitting}
-                    className="rounded-xl bg-blue-600 px-5 py-2 text-xs font-semibold text-white transition hover:bg-blue-700"
+                    className="rounded-xl bg-blue-600 px-5 py-2 text-xs font-semibold text-white transition hover:bg-blue-700 disabled:opacity-60"
                   >
                     {submitting ? "Saving..." : "Save Application"}
                   </button>
