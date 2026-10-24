@@ -2,6 +2,9 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { Mail, Copy, Check, ExternalLink } from "lucide-react";
+
+const SUPPORT_EMAIL = "contact.gvmsc@gmail.com";
 
 const FAQS = [
   {
@@ -86,15 +89,26 @@ export default function HelpPage() {
   const [openGuide, setOpenGuide] = useState<number | null>(null);
   const [contactForm, setContactForm] = useState({ subject: "", message: "" });
   const [contactSent, setContactSent] = useState(false);
+  const [copiedEmail, setCopiedEmail] = useState(false);
+
+  function copyEmail() {
+    navigator.clipboard.writeText(SUPPORT_EMAIL);
+    setCopiedEmail(true);
+    setTimeout(() => setCopiedEmail(false), 2500);
+  }
+
+  function openGmail(subject = "", body = "") {
+    const su = encodeURIComponent(subject || contactForm.subject);
+    const b = encodeURIComponent(body || contactForm.message);
+    const url = "https://mail.google.com/mail/?view=cm&fs=1&to=" + SUPPORT_EMAIL + (su ? "&su=" + su : "") + (b ? "&body=" + b : "");
+    window.open(url, "_blank");
+  }
 
   function handleContactSubmit(e: React.FormEvent) {
     e.preventDefault();
-    // Since there's no backend endpoint for this yet, we open mailto as fallback
-    const mailto = `mailto:support@resumo.app?subject=${encodeURIComponent(contactForm.subject)}&body=${encodeURIComponent(contactForm.message)}`;
+    const mailto = `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent(contactForm.subject)}&body=${encodeURIComponent(contactForm.message)}`;
     window.open(mailto, "_blank");
     setContactSent(true);
-    setContactForm({ subject: "", message: "" });
-    setTimeout(() => setContactSent(false), 4000);
   }
 
   const inputClass =
@@ -250,8 +264,54 @@ export default function HelpPage() {
               <h2 className="text-xl font-semibold">Contact Support</h2>
             </div>
             <p className="text-sm text-[var(--text-muted)] mb-6 ml-12">
-              Can&apos;t find what you need? Send us a message and we&apos;ll get back to you.
+              Have a question, feedback, or need help? Reach out directly to our team.
             </p>
+
+            {/* Direct Email Card */}
+            <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[var(--border)] bg-[var(--bg-muted)] p-4">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-500/10 text-blue-500">
+                  <Mail className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="text-xs text-[var(--text-muted)] font-medium">Official Support Email</p>
+                  <a
+                    href={`mailto:${SUPPORT_EMAIL}`}
+                    className="text-sm font-semibold text-[var(--text-primary)] hover:text-blue-500 transition"
+                  >
+                    {SUPPORT_EMAIL}
+                  </a>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={copyEmail}
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] px-3 py-1.5 text-xs font-medium text-[var(--text-secondary)] hover:bg-[var(--bg-surface-elevated)] transition cursor-pointer"
+                >
+                  {copiedEmail ? (
+                    <>
+                      <Check className="h-3.5 w-3.5 text-emerald-500" />
+                      <span className="text-emerald-500 font-semibold">Copied!</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="h-3.5 w-3.5" />
+                      <span>Copy Email</span>
+                    </>
+                  )}
+                </button>
+                <a
+                  href={`https://mail.google.com/mail/?view=cm&fs=1&to=${SUPPORT_EMAIL}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] px-3 py-1.5 text-xs font-medium text-[var(--text-secondary)] hover:bg-[var(--bg-surface-elevated)] transition"
+                >
+                  <ExternalLink className="h-3.5 w-3.5" />
+                  <span>Open in Gmail ↗</span>
+                </a>
+              </div>
+            </div>
 
             <form onSubmit={handleContactSubmit} className="space-y-4">
               <div>
@@ -264,7 +324,7 @@ export default function HelpPage() {
                   onChange={(e) =>
                     setContactForm({ ...contactForm, subject: e.target.value })
                   }
-                  placeholder="e.g. Issue with resume download"
+                  placeholder="e.g. Issue with resume download / Feature suggestion"
                   required
                   className={inputClass}
                 />
@@ -286,17 +346,41 @@ export default function HelpPage() {
               </div>
 
               {contactSent && (
-                <div className="rounded-lg p-3 text-sm border border-emerald-500/30 bg-emerald-500/10 text-emerald-400">
-                  Your email client has been opened with the message. Thank you for reaching out!
+                <div className="rounded-xl p-4 text-sm border border-emerald-500/30 bg-emerald-500/10 text-emerald-300 space-y-2">
+                  <div className="flex items-center gap-2 font-medium">
+                    <Check className="h-4 w-4 text-emerald-400" />
+                    <span>Email drafted to {SUPPORT_EMAIL}!</span>
+                  </div>
+                  <p className="text-xs text-[var(--text-secondary)]">
+                    If your default email app didn&apos;t automatically launch, you can also open and send it directly via Gmail web:
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => openGmail()}
+                    className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-emerald-500 transition cursor-pointer"
+                  >
+                    <ExternalLink className="h-3.5 w-3.5" />
+                    Open in Gmail Web
+                  </button>
                 </div>
               )}
 
-              <button
-                type="submit"
-                className="rounded-xl bg-[var(--accent)] px-6 py-2.5 text-sm font-medium text-white transition hover:bg-[var(--accent-hover)]"
-              >
-                Send Message
-              </button>
+              <div className="flex flex-wrap items-center gap-3 pt-1">
+                <button
+                  type="submit"
+                  className="rounded-xl bg-[var(--accent)] px-6 py-2.5 text-sm font-medium text-white transition hover:bg-[var(--accent-hover)] cursor-pointer"
+                >
+                  Send via Mail Client
+                </button>
+                <button
+                  type="button"
+                  onClick={() => openGmail()}
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-[var(--border)] bg-[var(--bg-muted)] px-5 py-2.5 text-sm font-medium text-[var(--text-primary)] hover:bg-[var(--bg-surface-elevated)] transition cursor-pointer"
+                >
+                  <ExternalLink className="h-4 w-4 text-[var(--text-muted)]" />
+                  Compose in Gmail
+                </button>
+              </div>
             </form>
           </section>
 
