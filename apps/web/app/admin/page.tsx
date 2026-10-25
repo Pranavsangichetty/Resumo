@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, notFound } from "next/navigation";
 import {
   Users,
   FileText,
@@ -56,6 +56,7 @@ export default function AdminPage() {
   const [filterRole, setFilterRole] = useState<"all" | "admin" | "active" | "suspended">("all");
   const [updatingUserId, setUpdatingUserId] = useState<number | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [isForbidden, setIsForbidden] = useState(false);
 
   function showToast(msg: string) {
     setToastMessage(msg);
@@ -88,7 +89,7 @@ export default function AdminPage() {
       }
 
       if (overviewRes.status === 403) {
-        setError("Access Denied: You do not have administrator privileges.");
+        setIsForbidden(true);
         setLoading(false);
         return;
       }
@@ -186,6 +187,10 @@ export default function AdminPage() {
       return true;
     });
   }, [users, searchQuery, filterRole]);
+
+  if (isForbidden) {
+    notFound();
+  }
 
   if (loading) {
     return (
