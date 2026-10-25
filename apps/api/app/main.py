@@ -4,6 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
+from app.api.routes.admin import router as admin_router
 from app.api.routes.analytics import router as analytics_router
 from app.api.routes.applications import router as applications_router
 from app.api.routes.auth import router as auth_router
@@ -97,6 +98,11 @@ app.include_router(
 )
 
 # Analytics
+app.include_router(
+    admin_router,
+    prefix="/api/v1",
+)
+
 app.include_router(
     analytics_router,
     prefix="/api/v1",

@@ -18,6 +18,8 @@ class UserResponse(BaseModel):
     id: int
     email: EmailStr
     is_active: bool
+    is_admin: bool = False
+    name: str | None = None
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)

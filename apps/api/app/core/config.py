@@ -20,6 +20,16 @@ class Settings(BaseSettings):
     GOOGLE_CLIENT_ID: str = ""
     RESEND_API_KEY: str = ""
 
+    ADMIN_EMAILS: str = "contact.gvmsc@gmail.com,sangichettypranav@gmail.com,gvmdurgasandeep@gmail.com"
+
+    @property
+    def admin_emails_list(self) -> list[str]:
+        return [
+            email.strip().lower()
+            for email in self.ADMIN_EMAILS.split(",")
+            if email.strip()
+        ]
+
     @field_validator("DATABASE_URL", mode="after")
     @classmethod
     def normalize_database_url(cls, v: str) -> str:

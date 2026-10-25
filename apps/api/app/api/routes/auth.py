@@ -244,4 +244,11 @@ def reset_password(
 def get_me(
     current_user: User = Depends(get_current_user),
 ):
-    return current_user
+    return {
+        "id": current_user.id,
+        "name": getattr(current_user, "name", None),
+        "email": current_user.email,
+        "is_active": current_user.is_active,
+        "is_admin": current_user.email.lower() in settings.admin_emails_list,
+        "created_at": current_user.created_at,
+    }

@@ -23,6 +23,7 @@ interface UserInfo {
   id: number;
   name?: string;
   email: string;
+  is_admin?: boolean;
 }
 
 interface SidebarProps {
@@ -126,6 +127,20 @@ export default function Sidebar({ mobileOpen = false, onCloseMobile }: SidebarPr
             <span className="text-base shrink-0">?</span>
             {!collapsed && <span>Help & Support</span>}
           </button>
+{user?.is_admin && (
+            <button
+              onClick={() => router.push("/admin")}
+              className={`w-full flex items-center gap-2.5 rounded-lg px-3 py-2 text-left text-[13px] font-semibold transition ${
+                pathname.startsWith("/admin")
+                  ? "bg-amber-500/15 text-amber-400 border border-amber-500/30"
+                  : "text-amber-400/90 hover:bg-amber-500/10 hover:text-amber-300 border border-amber-500/20"
+              }`}
+              title="Admin Panel"
+            >
+              <span className="text-base shrink-0">🛡️</span>
+              {!collapsed && <span>Admin Panel</span>}
+            </button>
+          )}
           <button
             onClick={() => router.push("/settings")}
             className="w-full flex items-center gap-2.5 rounded-lg px-3 py-2 text-left text-[13px] font-medium text-[var(--text-secondary)] hover:bg-[var(--bg-surface-elevated)] hover:text-[var(--text-primary)] transition"
@@ -271,6 +286,23 @@ export default function Sidebar({ mobileOpen = false, onCloseMobile }: SidebarPr
 
             {/* Bottom actions */}
             <div className="border-t border-[var(--border)] p-2 space-y-1">
+{user?.is_admin && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    onCloseMobile?.();
+                    router.push("/admin");
+                  }}
+                  className={`w-full flex items-center gap-3 rounded-xl px-3.5 py-2 text-left text-sm font-semibold transition ${
+                    pathname.startsWith("/admin")
+                      ? "bg-amber-500/15 text-amber-400 border border-amber-500/30"
+                      : "text-amber-400/90 hover:bg-amber-500/10 hover:text-amber-300 border border-amber-500/20"
+                  }`}
+                >
+                  <span className="text-lg shrink-0">🛡️</span>
+                  <span>Admin Panel</span>
+                </button>
+              )}
               <button
                 type="button"
                 onClick={() => {
