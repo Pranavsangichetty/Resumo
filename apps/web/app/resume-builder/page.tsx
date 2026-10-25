@@ -45,9 +45,10 @@ export default function ResumeBuilderPage() {
 
       try {
         const data = await getResumes(token);
-        setResumes(data);
+        setResumes(Array.isArray(data) ? data : []);
       } catch (error) {
         console.error("Failed to load resumes:", error);
+        setResumes([]);
       } finally {
         setLoading(false);
       }
@@ -352,7 +353,9 @@ export default function ResumeBuilderPage() {
           {!loading && resumes.length > 0 && (
             <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {resumes.map((resume) => {
-                const isSample = resume.title.toLowerCase().includes("sample") || resume.title.toLowerCase().includes("alex morgan");
+                if (!resume) return null;
+                const titleStr = typeof resume.title === "string" ? resume.title : "Untitled Resume";
+                const isSample = titleStr.toLowerCase().includes("sample") || titleStr.toLowerCase().includes("alex morgan");
 
                 return (
                   <div
@@ -372,7 +375,7 @@ export default function ResumeBuilderPage() {
                       </div>
 
                       <h3 className="mt-2 text-base font-semibold text-[var(--text-primary)] line-clamp-2">
-                        {resume.title}
+                        {titleStr}
                       </h3>
                     </div>
 
@@ -389,7 +392,7 @@ export default function ResumeBuilderPage() {
 
                       <button
                         onClick={() =>
-                          handleDeleteResume(resume.id, resume.title)
+                          handleDeleteResume(resume.id, titleStr)
                         }
                         disabled={deletingId === resume.id}
                         className="text-xs text-red-500 transition hover:text-red-400 disabled:cursor-not-allowed disabled:opacity-50"
