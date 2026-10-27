@@ -1,133 +1,98 @@
-"use client";
-
 import Link from "next/link";
-import { useEffect, useState } from "react";
-
-const THUMBNAILS = [
-  "/thumbnails/hero-banner-1.jpg",
-  "/thumbnails/hero-banner-2.jpg",
-  "/thumbnails/hero-banner-3.jpg",
-  "/thumbnails/hero-banner-4.jpg",
-];
-
-const STORAGE_KEY = "resumo_last_seen_thumbnail";
 
 export default function Home() {
-  const [selectedImage, setSelectedImage] = useState<string>(THUMBNAILS[0]);
-  const [mounted, setMounted] = useState<boolean>(false);
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
-
-  useEffect(() => {
-    // 1. Determine logged-in state to route user seamlessly
-    try {
-      const token = localStorage.getItem("token");
-      if (token) {
-        setIsLoggedIn(true);
-      }
-    } catch {}
-
-    // 2. Retrieve previous thumbnail index to guarantee a fresh, different design on every visit
-    let prevIndex = -1;
-    try {
-      const raw =
-        sessionStorage.getItem(STORAGE_KEY) ??
-        localStorage.getItem(STORAGE_KEY);
-      if (raw !== null) {
-        const parsed = parseInt(raw, 10);
-        if (!isNaN(parsed) && parsed >= 0 && parsed < THUMBNAILS.length) {
-          prevIndex = parsed;
-        }
-      }
-    } catch {}
-
-    // 3. Exclude the previous thumbnail from candidate pool
-    const candidates = [0, 1, 2, 3].filter((i) => i !== prevIndex);
-    const chosenIndex =
-      candidates[Math.floor(Math.random() * candidates.length)] ??
-      Math.floor(Math.random() * THUMBNAILS.length);
-
-    // 4. Save chosen index for next load
-    try {
-      sessionStorage.setItem(STORAGE_KEY, chosenIndex.toString());
-      localStorage.setItem(STORAGE_KEY, chosenIndex.toString());
-    } catch {}
-
-    setSelectedImage(THUMBNAILS[chosenIndex]);
-    setMounted(true);
-  }, []);
-
-  const destinationHref = isLoggedIn ? "/dashboard" : "/register";
-
   return (
-    <main className="relative w-full h-screen min-h-[100vh] h-[100svh] overflow-hidden m-0 p-0 bg-[#090a0f]">
-      {/* ── Top Navigation Overlay ── */}
-      <header className="absolute top-0 left-0 right-0 z-20 w-full px-3 sm:px-6 md:px-10 py-3 sm:py-5 flex items-center justify-between pointer-events-auto">
-        <Link
-          href="/"
-          className="flex items-center gap-2 sm:gap-2.5 bg-black/45 backdrop-blur-md px-3 py-1.5 rounded-xl sm:rounded-2xl border border-white/10 shadow-lg hover:border-white/20 transition"
-        >
-          <div className="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-lg sm:rounded-xl bg-indigo-500/20 border border-indigo-400/40 text-indigo-300 font-extrabold text-sm sm:text-base">
+    <main className="min-h-screen bg-[var(--bg-base)] text-[var(--text-primary)] p-8 md:p-16 relative overflow-hidden">
+      {/* Background Radial Glow */}
+      <div className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2 h-[550px] w-[900px] rounded-full bg-indigo-600/15 blur-[140px]" />
+
+      <nav className="relative mx-auto max-w-6xl flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 font-extrabold text-xl shadow-[0_0_15px_rgba(99,102,241,0.25)]">
             R
           </div>
           <div>
-            <b className="text-sm sm:text-base font-bold tracking-tight text-white leading-none block">
+            <b className="text-xl font-bold tracking-tight text-[var(--text-primary)]">
               Resumo
             </b>
-            <span className="hidden sm:block text-[9px] text-zinc-300 uppercase tracking-wider font-semibold leading-none mt-0.5">
+            <p className="text-[10px] text-[var(--text-muted)] uppercase tracking-wider font-semibold">
               Craft Better. Apply Smarter.
-            </span>
+            </p>
           </div>
-        </Link>
+        </div>
 
-        <nav className="flex items-center gap-1.5 sm:gap-2.5 bg-black/45 backdrop-blur-md px-2.5 sm:px-3 py-1.5 rounded-xl sm:rounded-2xl border border-white/10 shadow-lg">
+        <div className="flex items-center gap-3">
           <Link
             href="/about"
-            className="px-2.5 py-1 text-xs font-semibold text-zinc-200 transition hover:text-white"
+            className="px-3 py-2 text-xs font-semibold text-[var(--text-secondary)] transition hover:text-[var(--text-primary)]"
           >
             About
           </Link>
-          {isLoggedIn ? (
-            <Link
-              href="/dashboard"
-              className="rounded-lg sm:rounded-xl bg-indigo-600 hover:bg-indigo-500 px-3.5 py-1 text-xs font-semibold text-white transition shadow-[0_0_12px_rgba(99,102,241,0.4)]"
-            >
-              Dashboard →
-            </Link>
-          ) : (
-            <>
-              <Link
-                href="/login"
-                className="rounded-lg sm:rounded-xl border border-white/15 bg-white/10 px-3 py-1 text-xs font-semibold text-white transition hover:bg-white/20 hover:border-white/25"
-              >
-                Sign in
-              </Link>
-              <Link
-                href="/register"
-                className="rounded-lg sm:rounded-xl bg-indigo-600 hover:bg-indigo-500 px-3.5 py-1 text-xs font-semibold text-white transition shadow-[0_0_12px_rgba(99,102,241,0.4)]"
-              >
-                Get Started →
-              </Link>
-            </>
-          )}
-        </nav>
-      </header>
+          <Link
+            href="/login"
+            className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] px-4 py-2 text-xs font-semibold text-[var(--text-primary)] transition hover:border-indigo-500/40 hover:bg-[var(--bg-surface-elevated)]"
+          >
+            Sign in
+          </Link>
+          <Link
+            href="/register"
+            className="btn-indigo-glow rounded-xl px-4 py-2 text-xs font-semibold text-white transition"
+          >
+            Get Started →
+          </Link>
+        </div>
+      </nav>
 
-      {/* ── Full-Bleed Edge-to-Edge Random Thumbnail ── */}
-      <Link
-        href={destinationHref}
-        className="absolute inset-0 z-10 w-full h-full cursor-pointer block"
-        aria-label="Enter Resumo Platform"
-      >
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={selectedImage}
-          alt="Resumo"
-          className={`w-full h-full object-cover object-center select-none transition-opacity duration-300 ${
-            mounted ? "opacity-100" : "opacity-0"
-          }`}
-          loading="eager"
-        />
-      </Link>
+      <section className="relative mx-auto max-w-4xl py-24 sm:py-32 text-center flex flex-col items-center">
+        <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-indigo-500/30 bg-indigo-500/10 px-4 py-1.5 text-xs font-semibold text-indigo-400 backdrop-blur-md">
+          <span className="h-1.5 w-1.5 rounded-full bg-indigo-400 animate-pulse" />
+          Next-Gen AI Career Engineering Suite
+        </div>
+
+        <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight leading-tight sm:leading-tight text-[var(--text-primary)]">
+          Build a stronger resume for every single opportunity.
+        </h1>
+
+        <p className="mt-6 text-base sm:text-lg text-[var(--text-secondary)] max-w-2xl leading-relaxed">
+          AI resume optimization, precision ATS diagnostics, tailored cover letters, application tracking, and interactive mock interviews in one unified workspace.
+        </p>
+
+        <div className="mt-10 flex flex-wrap justify-center gap-4">
+          <Link
+            href="/dashboard"
+            className="btn-indigo-glow inline-flex items-center gap-2 rounded-2xl px-8 py-4 font-bold text-sm text-white transition hover:scale-105"
+          >
+            Open Workspace Dashboard →
+          </Link>
+          <Link
+            href="/register"
+            className="card-glow inline-flex items-center rounded-2xl px-8 py-4 font-semibold text-sm text-[var(--text-primary)] transition hover:border-indigo-500/50"
+          >
+            Create Free Account
+          </Link>
+        </div>
+
+        {/* Feature badges */}
+        <div className="mt-16 flex flex-wrap justify-center gap-2.5 max-w-3xl">
+          {[
+            "Resume Builder",
+            "ATS Score Evaluation",
+            "AI Keyword Optimization",
+            "Job Description Analyzer",
+            "Cover Letter Generator",
+            "Job Search Board",
+            "Applications Kanban",
+            "STAR Mock Interview",
+          ].map((f) => (
+            <span
+              key={f}
+              className="rounded-full border border-[var(--border)] bg-[var(--bg-surface)]/80 px-3.5 py-1.5 text-xs font-medium text-[var(--text-secondary)] shadow-sm"
+            >
+              {f}
+            </span>
+          ))}
+        </div>
+      </section>
     </main>
   );
 }
