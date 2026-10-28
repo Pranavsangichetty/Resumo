@@ -3,14 +3,22 @@ import Link from "next/link";
 export default function Home() {
   return (
     <main className="min-h-screen bg-[var(--bg-base)] text-[var(--text-primary)] p-8 md:p-16 relative overflow-hidden">
+      {/* Background image: light/dark variants */}
+      <div className="pointer-events-none fixed inset-0 h-screen w-screen bg-cover bg-center bg-no-repeat bg-[url('/bg-light.svg')] dark:bg-[url('/bg-dark.svg')]" />
+      {/* Light overlay keeps text readable */}
+      <div className="pointer-events-none fixed inset-0 bg-white/20 dark:bg-black/20" />
+
       {/* Background Radial Glow */}
       <div className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2 h-[550px] w-[900px] rounded-full bg-indigo-600/15 blur-[140px]" />
 
       <nav className="relative mx-auto max-w-6xl flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 font-extrabold text-xl shadow-[0_0_15px_rgba(99,102,241,0.25)]">
-            R
-          </div>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/logo.svg"
+            alt="Resumo logo"
+            className="h-10 w-10 rounded-xl object-contain"
+          />
           <div>
             <b className="text-xl font-bold tracking-tight text-[var(--text-primary)]">
               Resumo
@@ -92,6 +100,7 @@ export default function Home() {
             </span>
           ))}
         </div>
+
       </section>
     </main>
   );
