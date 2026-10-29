@@ -79,7 +79,8 @@ export default function RegisterPage() {
       <div className="relative w-full max-w-md">
         <div className="mb-8 text-center">
           <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 font-extrabold text-2xl mb-3 shadow-[0_0_20px_-3px_rgba(99,102,241,0.3)]">
-            R
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logo.png" alt="Resumo logo" className="h-full w-full rounded-[inherit] object-contain" />
           </div>
           <h1 className="text-3xl font-extrabold tracking-tight text-[var(--text-primary)]">
             Resumo

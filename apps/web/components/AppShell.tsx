@@ -85,7 +85,8 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
           <div className="flex items-center gap-2">
             <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 font-extrabold text-xs">
-              R
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/logo.png" alt="Resumo logo" className="h-full w-full rounded-[inherit] object-contain" />
             </div>
             <span className="text-sm font-bold tracking-tight text-[var(--text-primary)]">
               Resumo

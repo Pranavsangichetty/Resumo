@@ -61,7 +61,8 @@ export default function AboutPage() {
       <nav className="relative mx-auto max-w-6xl flex items-center justify-between p-8 md:px-16">
         <Link href="/" className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 font-extrabold text-xl shadow-[0_0_15px_rgba(99,102,241,0.25)]">
-            R
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logo.png" alt="Resumo logo" className="h-full w-full rounded-[inherit] object-contain" />
           </div>
           <div>
             <b className="text-xl font-bold tracking-tight text-[var(--text-primary)]">

@@ -78,7 +78,8 @@ export default function Sidebar({ mobileOpen = false, onCloseMobile }: SidebarPr
         {/* Logo */}
         <div className="flex items-center gap-2.5 px-4 py-5 border-b border-[var(--border)]">
           <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 font-extrabold text-sm">
-            R
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logo.png" alt="Resumo logo" className="h-full w-full rounded-[inherit] object-contain" />
           </div>
           {!collapsed && (
             <span className="text-sm font-bold text-[var(--text-primary)] tracking-tight">
@@ -237,7 +238,8 @@ export default function Sidebar({ mobileOpen = false, onCloseMobile }: SidebarPr
             <div className="flex items-center justify-between px-4 py-4 border-b border-[var(--border)]">
               <div className="flex items-center gap-2.5">
                 <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 font-extrabold text-sm">
-                  R
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src="/logo.png" alt="Resumo logo" className="h-full w-full rounded-[inherit] object-contain" />
                 </div>
                 <span className="text-base font-bold text-[var(--text-primary)] tracking-tight">
                   Resumo

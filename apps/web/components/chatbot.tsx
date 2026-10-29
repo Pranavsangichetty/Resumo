@@ -103,7 +103,8 @@ export function Chatbot() {
       <header className="flex items-center justify-between border-b border-[var(--border)] bg-[var(--bg-muted)]/80 p-4 shrink-0">
         <div className="flex items-center gap-2.5">
           <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 font-bold text-sm">
-            R
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logo.png" alt="Resumo logo" className="h-full w-full rounded-[inherit] object-contain" />
           </div>
           <div>
             <b className="text-sm text-[var(--text-primary)] block font-semibold">Resumo Assistant</b>

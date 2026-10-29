@@ -15,7 +15,7 @@ export default function Home() {
         <div className="flex items-center gap-3">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src="/logo.svg"
+            src="/logo.png"
             alt="Resumo logo"
             className="h-10 w-10 rounded-xl object-contain"
           />
@@ -51,13 +51,14 @@ export default function Home() {
         </div>
       </nav>
 
-      <section className="relative mx-auto max-w-4xl py-24 sm:py-32 text-center flex flex-col items-center">
+      <section className="relative mx-auto max-w-6xl py-16 sm:py-24 grid items-center gap-12 lg:grid-cols-2">
+        <div className="text-center lg:text-left flex flex-col items-center lg:items-start">
         <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-indigo-500/30 bg-indigo-500/10 px-4 py-1.5 text-xs font-semibold text-indigo-400 backdrop-blur-md">
           <span className="h-1.5 w-1.5 rounded-full bg-indigo-400 animate-pulse" />
           Next-Gen AI Career Engineering Suite
         </div>
 
-        <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight leading-tight sm:leading-tight text-[var(--text-primary)]">
+        <h1 className="text-4xl sm:text-5xl xl:text-6xl font-extrabold tracking-tight leading-tight sm:leading-tight text-[var(--text-primary)]">
           Build a stronger resume for every single opportunity.
         </h1>
 
@@ -65,7 +66,7 @@ export default function Home() {
           AI resume optimization, precision ATS diagnostics, tailored cover letters, application tracking, and interactive mock interviews in one unified workspace.
         </p>
 
-        <div className="mt-10 flex flex-wrap justify-center gap-4">
+        <div className="mt-10 flex flex-wrap justify-center lg:justify-start gap-4">
           <Link
             href="/dashboard"
             className="btn-indigo-glow inline-flex items-center gap-2 rounded-2xl px-8 py-4 font-bold text-sm text-white transition hover:scale-105"
@@ -81,7 +82,7 @@ export default function Home() {
         </div>
 
         {/* Feature badges */}
-        <div className="mt-16 flex flex-wrap justify-center gap-2.5 max-w-3xl">
+        <div className="mt-12 flex flex-wrap justify-center lg:justify-start gap-2.5 max-w-3xl">
           {[
             "Resume Builder",
             "ATS Score Evaluation",
@@ -100,7 +101,24 @@ export default function Home() {
             </span>
           ))}
         </div>
+        </div>
 
+        {/* Hero cover photo: light/dark variants, shown whole at its natural aspect ratio */}
+        <div className="relative mx-auto w-full max-w-xl">
+          <div className="pointer-events-none absolute -inset-6 rounded-[2rem] bg-indigo-600/20 blur-3xl" />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/cover-light.png"
+            alt="Resumo dashboard preview"
+            className="relative w-full h-auto rounded-3xl border border-[var(--border)] shadow-2xl dark:hidden"
+          />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/cover-dark.png"
+            alt="Resumo dashboard preview"
+            className="relative hidden w-full h-auto rounded-3xl border border-[var(--border)] shadow-2xl dark:block"
+          />
+        </div>
       </section>
     </main>
   );
