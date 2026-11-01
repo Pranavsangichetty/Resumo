@@ -1077,6 +1077,28 @@ export default function ResumeEditorPage() {
     }
   }
 
+  // Auto-save listener when clicking logo or navigating back to dashboard
+  useEffect(() => {
+    const handleAutoSave = async (e: Event) => {
+      const customEvent = e as CustomEvent<{ resolve?: () => void }>;
+      try {
+        await handleSave();
+      } catch (err) {
+        console.error("Auto-save resume failed:", err);
+      } finally {
+        if (customEvent.detail && typeof customEvent.detail.resolve === "function") {
+          customEvent.detail.resolve();
+        }
+      }
+    };
+
+    window.addEventListener("resumo:request-save", handleAutoSave);
+    return () => {
+      window.removeEventListener("resumo:request-save", handleAutoSave);
+    };
+  }, [resumeData, title, resume]);
+
+
 
   // ======================================================
   // LOADING

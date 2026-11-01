@@ -29,9 +29,10 @@ interface UserInfo {
 interface SidebarProps {
   mobileOpen?: boolean;
   onCloseMobile?: () => void;
+  onLogoClick?: () => void;
 }
 
-export default function Sidebar({ mobileOpen = false, onCloseMobile }: SidebarProps) {
+export default function Sidebar({ mobileOpen = false, onCloseMobile, onLogoClick }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [collapsed, setCollapsed] = useState(false);
@@ -76,17 +77,22 @@ export default function Sidebar({ mobileOpen = false, onCloseMobile }: SidebarPr
         }`}
       >
         {/* Logo */}
-        <div className="flex items-center gap-2.5 px-4 py-5 border-b border-[var(--border)]">
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 font-extrabold text-sm">
+        <button
+          type="button"
+          onClick={onLogoClick}
+          className="flex items-center gap-2.5 px-4 py-5 border-b border-[var(--border)] text-left hover:bg-[var(--bg-surface-elevated)]/60 transition group cursor-pointer w-full focus:outline-none"
+          title={pathname === "/dashboard" ? "Resumo Dashboard" : "Back to Dashboard"}
+        >
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 font-extrabold text-sm group-hover:scale-105 group-hover:border-indigo-500/60 transition">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/logo.png" alt="Resumo logo" className="h-full w-full rounded-[inherit] object-contain" />
           </div>
           {!collapsed && (
-            <span className="text-sm font-bold text-[var(--text-primary)] tracking-tight">
+            <span className="text-sm font-bold text-[var(--text-primary)] group-hover:text-indigo-400 tracking-tight transition">
               Resumo
             </span>
           )}
-        </div>
+        </button>
 
         {/* Nav links */}
         <nav className="flex-1 overflow-y-auto py-3 px-2 space-y-0.5">
@@ -196,7 +202,7 @@ export default function Sidebar({ mobileOpen = false, onCloseMobile }: SidebarPr
                     {user.name || "User"}
                   </p>
                   <p className="text-[10px] text-[var(--text-muted)] truncate">
-                    ID: {user.id} · {user.email}
+                    {user.email}
                   </p>
                 </div>
               )}
@@ -236,15 +242,23 @@ export default function Sidebar({ mobileOpen = false, onCloseMobile }: SidebarPr
           <aside className="fixed inset-y-0 left-0 z-50 w-[270px] max-w-[85vw] flex flex-col bg-[var(--bg-surface)] border-r border-[var(--border)] shadow-2xl animate-in slide-in-from-left duration-200">
             {/* Header */}
             <div className="flex items-center justify-between px-4 py-4 border-b border-[var(--border)]">
-              <div className="flex items-center gap-2.5">
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 font-extrabold text-sm">
+              <button
+                type="button"
+                onClick={() => {
+                  onCloseMobile?.();
+                  onLogoClick?.();
+                }}
+                className="flex items-center gap-2.5 text-left group cursor-pointer focus:outline-none"
+                title={pathname === "/dashboard" ? "Resumo Dashboard" : "Back to Dashboard"}
+              >
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 font-extrabold text-sm group-hover:scale-105 transition">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src="/logo.png" alt="Resumo logo" className="h-full w-full rounded-[inherit] object-contain" />
                 </div>
-                <span className="text-base font-bold text-[var(--text-primary)] tracking-tight">
+                <span className="text-base font-bold text-[var(--text-primary)] group-hover:text-indigo-400 tracking-tight transition">
                   Resumo
                 </span>
-              </div>
+              </button>
               <button
                 type="button"
                 onClick={onCloseMobile}

@@ -102,6 +102,39 @@ export default function SettingsPage() {
     setSettings((prev) => ({ ...prev, theme: newTheme }));
   }
 
+  // Auto-save listener when clicking logo or navigating back to dashboard
+  useEffect(() => {
+    const handleAutoSave = async (e: Event) => {
+      const customEvent = e as CustomEvent<{ resolve?: () => void }>;
+      try {
+        const token = localStorage.getItem("access_token");
+        if (token) {
+          await fetch(`${API_URL}/api/v1/settings`, {
+            method: "PATCH",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+              "bypass-tunnel-reminder": "true",
+            },
+            body: JSON.stringify(settings),
+          });
+        }
+      } catch (err) {
+        console.error("Auto-save settings failed:", err);
+      } finally {
+        if (customEvent.detail && typeof customEvent.detail.resolve === "function") {
+          customEvent.detail.resolve();
+        }
+      }
+    };
+
+    window.addEventListener("resumo:request-save", handleAutoSave);
+    return () => {
+      window.removeEventListener("resumo:request-save", handleAutoSave);
+    };
+  }, [settings]);
+
+
   async function handleSaveSettings(e: React.FormEvent) {
     e.preventDefault();
     const token = localStorage.getItem("access_token");

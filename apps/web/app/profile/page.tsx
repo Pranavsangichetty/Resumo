@@ -596,7 +596,7 @@ export default function ProfilePage() {
                     {profile.personal.fullName || "Your Full Name"}
                   </h2>
                   <span className="rounded-full bg-indigo-500/15 border border-indigo-500/30 px-2.5 py-0.5 text-[11px] font-bold text-indigo-400">
-                    ID: {userId || "User"}
+                    Candidate Profile
                   </span>
                 </div>
 
