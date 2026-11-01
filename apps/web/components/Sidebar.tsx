@@ -105,6 +105,7 @@ export default function Sidebar({ mobileOpen = false, onCloseMobile, onLogoClick
               <button
                 key={item.href}
                 onClick={() => router.push(item.href)}
+                title={collapsed ? item.label : undefined}
                 className={`
                   w-full flex items-center gap-2.5 rounded-lg px-3 py-2 text-left text-[13px] font-medium transition
                   ${
@@ -114,8 +115,11 @@ export default function Sidebar({ mobileOpen = false, onCloseMobile, onLogoClick
                   }
                 `}
               >
-                <span className="text-base shrink-0">{item.icon}</span>
-                {!collapsed && <span className="truncate">{item.label}</span>}
+                {collapsed ? (
+                  <span className="text-base shrink-0">{item.icon}</span>
+                ) : (
+                  <span className="truncate">{item.label}</span>
+                )}
               </button>
             );
           })}
@@ -131,8 +135,11 @@ export default function Sidebar({ mobileOpen = false, onCloseMobile, onLogoClick
                 : "text-[var(--text-secondary)] hover:bg-[var(--bg-surface-elevated)] hover:text-[var(--text-primary)] border border-transparent"
             }`}
           >
-            <span className="text-base shrink-0">?</span>
-            {!collapsed && <span>Help & Support</span>}
+            {collapsed ? (
+              <span className="text-base shrink-0">?</span>
+            ) : (
+              <span>Help & Support</span>
+            )}
           </button>
 {user?.is_admin && (
             <button
@@ -144,16 +151,22 @@ export default function Sidebar({ mobileOpen = false, onCloseMobile, onLogoClick
               }`}
               title="Admin Panel"
             >
-              <span className="text-base shrink-0">🛡️</span>
-              {!collapsed && <span>Admin Panel</span>}
+              {collapsed ? (
+                <span className="text-base shrink-0">🛡️</span>
+              ) : (
+                <span>Admin Panel</span>
+              )}
             </button>
           )}
           <button
             onClick={() => router.push("/settings")}
             className="w-full flex items-center gap-2.5 rounded-lg px-3 py-2 text-left text-[13px] font-medium text-[var(--text-secondary)] hover:bg-[var(--bg-surface-elevated)] hover:text-[var(--text-primary)] transition"
           >
-            <span className="text-base shrink-0">⚙</span>
-            {!collapsed && <span>Settings</span>}
+            {collapsed ? (
+              <span className="text-base shrink-0">⚙</span>
+            ) : (
+              <span>Settings</span>
+            )}
           </button>
         </div>
 
@@ -293,7 +306,6 @@ export default function Sidebar({ mobileOpen = false, onCloseMobile, onLogoClick
                         : "text-[var(--text-secondary)] hover:bg-[var(--bg-surface-elevated)] hover:text-[var(--text-primary)] border border-transparent"
                     }`}
                   >
-                    <span className="text-lg shrink-0">{item.icon}</span>
                     <span className="truncate">{item.label}</span>
                   </button>
                 );
@@ -315,7 +327,6 @@ export default function Sidebar({ mobileOpen = false, onCloseMobile, onLogoClick
                       : "text-amber-400/90 hover:bg-amber-500/10 hover:text-amber-300 border border-amber-500/20"
                   }`}
                 >
-                  <span className="text-lg shrink-0">🛡️</span>
                   <span>Admin Panel</span>
                 </button>
               )}
@@ -331,7 +342,6 @@ export default function Sidebar({ mobileOpen = false, onCloseMobile, onLogoClick
                     : "text-[var(--text-secondary)] hover:bg-[var(--bg-surface-elevated)] hover:text-[var(--text-primary)] border border-transparent"
                 }`}
               >
-                <span className="text-lg shrink-0">?</span>
                 <span>Help & Support</span>
               </button>
               <button
@@ -342,7 +352,6 @@ export default function Sidebar({ mobileOpen = false, onCloseMobile, onLogoClick
                 }}
                 className="w-full flex items-center gap-3 rounded-xl px-3.5 py-2 text-left text-sm font-medium text-[var(--text-secondary)] hover:bg-[var(--bg-surface-elevated)] hover:text-[var(--text-primary)] transition"
               >
-                <span className="text-lg shrink-0">⚙</span>
                 <span>Settings</span>
               </button>
             </div>
