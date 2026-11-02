@@ -2,6 +2,8 @@
 
 import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import ExistingResumeUpload from "@/components/resume-editor/ExistingResumeUpload";
+import { getResumes, Resume } from "@/lib/api";
 
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
@@ -32,6 +34,11 @@ function OptimizationContent() {
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
+  const [savedResumes, setSavedResumes] = useState<Resume[]>([]);
+  const [selectedResumeId, setSelectedResumeId] = useState<string>("");
+  const [directJobDescription, setDirectJobDescription] = useState("");
+  const [fetchingResumes, setFetchingResumes] = useState(false);
 
   // ----------------------------------------------------
   // Read URL parameters
@@ -64,11 +71,21 @@ function OptimizationContent() {
       // --------------------------------------------------
 
       if (!resumeId || !jobDescription) {
-        setError(
-          "Resume ID or job description is missing."
-        );
-
         setLoading(false);
+        setFetchingResumes(true);
+        try {
+          const resumes = await getResumes(token);
+          if (Array.isArray(resumes)) {
+            setSavedResumes(resumes);
+            if (resumes.length > 0) {
+              setSelectedResumeId(String(resumes[0].id));
+            }
+          }
+        } catch (e) {
+          console.error("Could not load resumes for optimizer setup:", e);
+        } finally {
+          setFetchingResumes(false);
+        }
         return;
       }
 
@@ -238,6 +255,223 @@ function OptimizationContent() {
   }
 
   // ======================================================
+  // PREREQUISITES MISSING (No Resume or JD passed in URL)
+  // ======================================================
+
+  if (!resumeId || !jobDescription) {
+    return (
+      <main className="min-h-screen bg-[var(--bg-base)] px-4 py-8 sm:px-6 md:p-12">
+        <div className="mx-auto max-w-4xl space-y-8">
+          <button
+            type="button"
+            onClick={() => router.push("/dashboard")}
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--text-muted)] hover:text-indigo-400 transition"
+          >
+            ← Return to Dashboard
+          </button>
+
+          {/* HERO BANNER */}
+          <div className="space-y-3">
+            <div className="inline-flex items-center gap-2 rounded-full border border-indigo-500/30 bg-indigo-500/10 px-3.5 py-1 text-xs font-semibold text-indigo-400">
+              <span>✦</span> AI Resume Optimizer Setup
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-[var(--text-primary)] tracking-tight">
+              Complete Prior Modules or Upload a Resume
+            </h1>
+            <p className="text-sm text-[var(--text-secondary)] max-w-2xl leading-relaxed">
+              To tailor and improve your resume using AI, you need an active resume and a target job description. Complete the prior modules below or upload your resume file to begin.
+            </p>
+          </div>
+
+          {/* TWO MAIN PATHWAYS */}
+          <div className="grid gap-6 md:grid-cols-2">
+            {/* OPTION 1: COMPLETE PRIOR MODULES */}
+            <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-6 space-y-5 flex flex-col justify-between shadow-sm">
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 text-base font-bold">
+                    1
+                  </div>
+                  <div>
+                    <h2 className="text-base font-bold text-[var(--text-primary)]">
+                      Option 1: Complete Prior Modules
+                    </h2>
+                    <p className="text-xs text-[var(--text-muted)]">
+                      Follow the workflow to create, analyze &amp; optimize
+                    </p>
+                  </div>
+                </div>
+
+                <div className="space-y-3 pt-2">
+                  {/* Step A: Resume Builder */}
+                  <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-base)] p-3.5 flex items-center justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="text-xs font-semibold text-[var(--text-primary)]">
+                        📄 Resume Builder
+                      </p>
+                      <p className="text-[11px] text-[var(--text-muted)] truncate">
+                        Create or edit your structured resume
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => router.push("/resume-builder")}
+                      className="shrink-0 rounded-lg bg-indigo-600 hover:bg-indigo-500 px-3 py-1.5 text-xs font-semibold text-white transition shadow-sm"
+                    >
+                      Open Builder →
+                    </button>
+                  </div>
+
+                  {/* Step B: Job Description */}
+                  <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-base)] p-3.5 flex items-center justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="text-xs font-semibold text-[var(--text-primary)]">
+                        🎯 Job Description
+                      </p>
+                      <p className="text-[11px] text-[var(--text-muted)] truncate">
+                        Paste &amp; extract keywords from job posts
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => router.push("/job-description")}
+                      className="shrink-0 rounded-lg bg-indigo-600 hover:bg-indigo-500 px-3 py-1.5 text-xs font-semibold text-white transition shadow-sm"
+                    >
+                      Analyze JD →
+                    </button>
+                  </div>
+
+                  {/* Step C: ATS Evaluation */}
+                  <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-base)] p-3.5 flex items-center justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="text-xs font-semibold text-[var(--text-primary)]">
+                        ⚡ ATS Evaluation
+                      </p>
+                      <p className="text-[11px] text-[var(--text-muted)] truncate">
+                        Score resume vs JD and 1-click launch AI optimizer
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => router.push("/ats")}
+                      className="shrink-0 rounded-lg bg-indigo-600 hover:bg-indigo-500 px-3 py-1.5 text-xs font-semibold text-white transition shadow-sm"
+                    >
+                      Run ATS →
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="border-t border-[var(--border)] pt-3 text-[11px] text-[var(--text-muted)]">
+                💡 <strong>Recommended Flow:</strong> Run an <strong>ATS Evaluation</strong> on your resume; clicking <em>"AI Optimizer"</em> inside ATS will automatically load your resume and target job here!
+              </div>
+            </div>
+
+            {/* OPTION 2: UPLOAD RESUME FILE */}
+            <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-6 space-y-5 flex flex-col justify-between shadow-sm">
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-base font-bold">
+                    2
+                  </div>
+                  <div>
+                    <h2 className="text-base font-bold text-[var(--text-primary)]">
+                      Option 2: Upload Existing Resume
+                    </h2>
+                    <p className="text-xs text-[var(--text-muted)]">
+                      Upload your PDF or DOCX file to extract and edit
+                    </p>
+                  </div>
+                </div>
+
+                <div className="pt-2">
+                  <ExistingResumeUpload />
+                </div>
+              </div>
+
+              <div className="border-t border-[var(--border)] pt-3 text-[11px] text-[var(--text-muted)]">
+                📁 Uploading creates a structured resume in your workspace so you can optimize it against any target job.
+              </div>
+            </div>
+          </div>
+
+          {/* OPTIONAL QUICK START IF SAVED RESUMES ALREADY EXIST */}
+          {savedResumes.length > 0 && (
+            <div className="rounded-2xl border border-indigo-500/20 bg-indigo-500/5 p-6 space-y-4 shadow-sm">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-sm font-bold text-[var(--text-primary)] flex items-center gap-2">
+                    <span>⚡ Quick Launch With Saved Resumes</span>
+                    <span className="rounded-full bg-indigo-500/20 px-2 py-0.5 text-[10px] font-semibold text-indigo-400">
+                      {savedResumes.length} {savedResumes.length === 1 ? "resume" : "resumes"} found
+                    </span>
+                  </h3>
+                  <p className="text-xs text-[var(--text-muted)] mt-0.5">
+                    Select one of your existing resumes and paste a job description to optimize immediately
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-[var(--text-primary)]">
+                    Select Resume
+                  </label>
+                  <select
+                    value={selectedResumeId}
+                    onChange={(e) => setSelectedResumeId(e.target.value)}
+                    className="w-full rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] px-3 py-2 text-xs text-[var(--text-primary)] focus:border-indigo-500 focus:outline-none"
+                  >
+                    {savedResumes.map((r) => (
+                      <option key={r.id} value={String(r.id)}>
+                        {r.title || `Resume #${r.id}`}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="space-y-1.5 sm:col-span-2">
+                  <label className="text-xs font-semibold text-[var(--text-primary)]">
+                    Target Job Description (Minimum 20 characters)
+                  </label>
+                  <textarea
+                    rows={4}
+                    value={directJobDescription}
+                    onChange={(e) => setDirectJobDescription(e.target.value)}
+                    placeholder="Paste the job description or role requirements here..."
+                    className="w-full rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-3 text-xs text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:border-indigo-500 focus:outline-none resize-none"
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end">
+                <button
+                  type="button"
+                  disabled={
+                    !selectedResumeId ||
+                    directJobDescription.trim().length < 20
+                  }
+                  onClick={() => {
+                    router.push(
+                      `/optimization?resume_id=${selectedResumeId}&job_description=${encodeURIComponent(
+                        directJobDescription.trim()
+                      )}`
+                    );
+                  }}
+                  className="rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 disabled:cursor-not-allowed px-5 py-2.5 text-xs font-semibold text-white transition shadow-sm flex items-center gap-2 cursor-pointer"
+                >
+                  <span>✦</span>
+                  <span>Start AI Optimization →</span>
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </main>
+    );
+  }
+
+  // ======================================================
   // ERROR
   // ======================================================
 
@@ -254,25 +488,43 @@ function OptimizationContent() {
             ← Back
           </button>
 
-          <div className="rounded-2xl border border-red-500/30 bg-red-500/5 p-6">
+          <div className="rounded-2xl border border-red-500/30 bg-red-500/5 p-6 space-y-4">
 
             <h1 className="text-xl font-semibold text-red-400">
-              Optimization failed
+              Optimization Failed
             </h1>
 
-            <p className="mt-3 text-sm text-[var(--text-muted)]">
+            <p className="text-sm text-[var(--text-muted)]">
               {error}
             </p>
 
-            <button
-              type="button"
-              onClick={() =>
-                window.location.reload()
-              }
-              className="mt-6 rounded-xl bg-blue-600 px-5 py-3 text-sm font-medium text-white transition hover:bg-blue-700"
-            >
-              Try Again
-            </button>
+            <div className="flex flex-wrap items-center gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() =>
+                  window.location.reload()
+                }
+                className="rounded-xl bg-indigo-600 px-5 py-2.5 text-xs font-semibold text-white transition hover:bg-indigo-500 shadow-sm"
+              >
+                Try Again
+              </button>
+
+              <button
+                type="button"
+                onClick={() => router.push("/ats")}
+                className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] px-4 py-2.5 text-xs font-semibold text-[var(--text-primary)] hover:border-indigo-500/40 transition"
+              >
+                Go to ATS Evaluation →
+              </button>
+
+              <button
+                type="button"
+                onClick={() => router.push("/resume-builder")}
+                className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] px-4 py-2.5 text-xs font-semibold text-[var(--text-primary)] hover:border-indigo-500/40 transition"
+              >
+                Open Resume Builder →
+              </button>
+            </div>
 
           </div>
 
