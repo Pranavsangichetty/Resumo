@@ -17,6 +17,7 @@ import {
   Mail,
   Calendar,
   Sparkles,
+  Download,
 } from "lucide-react";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL?.replace(/\/+$/, "") || "http://localhost:8000";
@@ -168,6 +169,47 @@ export default function AdminPage() {
     } finally {
       setUpdatingUserId(null);
     }
+  }
+
+  function exportUsersToCsv() {
+    if (!users.length) {
+      alert("No users to export.");
+      return;
+    }
+    const headers = [
+      "ID",
+      "Name",
+      "Email",
+      "Role",
+      "Auth Provider",
+      "Resumes",
+      "ATS Scans",
+      "Applications",
+      "Joined Date",
+      "Status",
+    ];
+    const rows = users.map((u) => [
+      u.id,
+      `"${(u.name || "").replace(/"/g, '""')}"`,
+      `"${u.email.replace(/"/g, '""')}"`,
+      u.is_admin ? "Admin" : "User",
+      u.auth_provider,
+      u.resumes_count,
+      u.ats_scans_count,
+      u.applications_count,
+      u.created_at ? new Date(u.created_at).toLocaleDateString() : "",
+      u.is_active ? "Active" : "Suspended",
+    ]);
+
+    const csvContent = [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", `resumo_users_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   }
 
   // Filtered user list
