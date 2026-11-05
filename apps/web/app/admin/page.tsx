@@ -378,6 +378,7 @@ export default function AdminPage() {
             <table className="w-full text-left text-xs">
               <thead className="bg-[var(--bg-muted)] text-[var(--text-muted)] border-b border-[var(--border)] uppercase tracking-wider text-[11px] font-semibold">
                 <tr>
+                  <th className="py-3 px-4">ID</th>
                   <th className="py-3 px-4">User</th>
                   <th className="py-3 px-4">Role</th>
                   <th className="py-3 px-4">Auth Provider</th>
@@ -392,13 +393,20 @@ export default function AdminPage() {
               <tbody className="divide-y divide-[var(--border)] bg-[var(--bg-surface)]">
                 {filteredUsers.length === 0 ? (
                   <tr>
-                    <td colSpan={9} className="py-10 text-center text-sm text-[var(--text-muted)]">
+                    <td colSpan={10} className="py-10 text-center text-sm text-[var(--text-muted)]">
                       No users match your criteria.
                     </td>
                   </tr>
                 ) : (
                   filteredUsers.map((u) => (
                     <tr key={u.id} className="hover:bg-[var(--bg-surface-elevated)]/60 transition">
+                      {/* ID */}
+                      <td className="py-3 px-4 font-mono font-bold text-indigo-400">
+                        <span className="inline-flex items-center rounded-md border border-indigo-500/30 bg-indigo-500/10 px-2 py-0.5 text-[11px]">
+                          #{u.id}
+                        </span>
+                      </td>
+
                       {/* User */}
                       <td className="py-3 px-4">
                         <div className="flex items-center gap-3">
